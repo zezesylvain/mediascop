@@ -1,0 +1,72 @@
+<?php
+
+namespace App\Http\Controllers\Client;
+
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Session;
+
+class ClientFunctionController extends Controller
+{
+    public static function showDocCampagne(int $cid){
+        $resdoc = Session::get('docCampagnes');
+        if (!empty($resdoc[$cid])):
+            $documents = [];
+            $cheminfichier = 'upload'.DIRECTORY_SEPARATOR.'campagnes'.DIRECTORY_SEPARATOR.$cid;
+            foreach ($resdoc[$cid] as $media => $r):
+                foreach ($r as $data):
+                    if (in_array($data['type'], ['jpg','jpeg','png','gif','svg'])):
+                        $documents[$media]['img'][] = $data;
+                    endif;
+                    if (in_array($data['type'], ['mp3','wav'])):
+                        $documents[$media]['audio'][] = $data;
+                    endif;
+                    if (in_array($data['type'], ['mp4','ogg'])):
+                        $documents[$media]['video'][] = $data;
+                    endif;
+                endforeach;
+            endforeach;
+            $medias = Session::get("detailDesCampagnes.$cid.lesMediasDeLaCampagne");
+            dd($documents) ;
+            return view('clients.campagnes.showDocCampagne',compact('cheminfichier','documents','medias'))->render();
+        endif;
+    }
+    public static function showDocCampagneOR(int $cid){
+        $resdoc = Session::get('docCampagnes');
+        if (!empty($resdoc[$cid])):
+            $documents = [];
+            $aid = Session::get("detailDesCampagnes.$cid.AnnonceurID");
+            $cheminfichier = 'upload'.DIRECTORY_SEPARATOR.'campagnes'.DIRECTORY_SEPARATOR.'visuels'.DIRECTORY_SEPARATOR.$aid.DIRECTORY_SEPARATOR;
+            foreach ($resdoc[$cid] as $media => $r):
+                foreach ($r as $data):
+                    if (in_array($data['type'], ['jpg','jpeg','png','gif','svg'])):
+                        $documents[$media]['img'][] = $data;
+                    endif;
+                    if (in_array($data['type'], ['mp3','wav'])):
+                        $documents[$media]['audio'][] = $data;
+                    endif;
+                    if (in_array($data['type'], ['mp4','ogg'])):
+                        $documents[$media]['video'][] = $data;
+                    endif;
+                endforeach;
+            endforeach;
+            $medias = Session::get("detailDesCampagnes.$cid.lesMediasDeLaCampagne");
+            return view('clients.campagnes.showDocCampagne',compact('cheminfichier','documents','medias'))->render();
+        endif;
+    }
+
+    public function detailCampagne(string $cid){
+        $cid = decrypt($cid);
+        $res = Session::has("detailDesCampagnes.$cid") ? Session::get("detailDesCampagnes.$cid") : [];
+        $view = "";
+        if(!empty($res)):
+            //$resfirst = Session::has("lesSppeedNews.$cid") ? Session::get("lesSppeedNews.$cid")[0] : [];
+            $docCamp = '';
+            if (Session::has('docCampagnes') && array_key_exists($cid,Session::get('docCampagnes'))):
+                $docCamp = self::showDocCampagne($cid);
+            endif;
+            $view = view('clients.campagnes.detail', compact('res','docCamp', 'cid'))->render();
+        endif;
+        return $view;
+    }
+}

@@ -1,0 +1,1 @@
+        <input name="campagne[] value="" type="hidden">

@@ -1,0 +1,9 @@
+@if(session()->has('echec'))
+    @include('woody.Html.echec')
+@endif
+@if(session()->has('success'))
+    @include('woody.Html.success')
+@endif
+@if(session()->has('info'))
+    @include('woody.Html.info')
+@endif
