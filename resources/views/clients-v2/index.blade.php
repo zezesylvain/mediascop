@@ -1,8 +1,8 @@
 @php
 extract($lesDonnees) ;
-//dd($lesDonnees);
 @endphp
 @extends("layouts.client")
+
 @section("menu")
     @include("clients-v2.menu")
 @stop
@@ -14,6 +14,7 @@ extract($lesDonnees) ;
             </div>
             <div role="navigation">
                 @include("clients-v2.form")
+                @include("clients-v2.selectionbox")
             </div> <!-- END .col .sidebar -->
         </div>
         <div class="tab-pane fade active in" id="graphique-pills">

@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use App\Models\Reporting;
 use App\Models\Rapport;
+use App\Models\Annonceur;
+use App\Models\Support;
 use App\Models\Secteur;
 use App\Models\Media;
 use App\Models\Speednew;
@@ -40,7 +42,7 @@ class DataController extends Controller
         $annonceur = self::$annonceur;
         $media = self::$media;
         $support = self::$support;
-        return self::built(compact('date_debut', 'date_fin', 'secteur', 'annonceur', 'annonceur', 'support')) ;
+        return self::built(compact('date_debut', 'date_fin', 'secteur',  'annonceur', 'support')) ;
     }
     
     public static function built($donnees){
@@ -51,26 +53,40 @@ class DataController extends Controller
                                     'media:id,name', 'support:id,name', 'format:id,name', 'cible:id,name', 
                                     'campagnetitle:id,title', 'operation:id,name', 'typecom:id,name','typeservice:id,name')
                             ->whereBetween('date', [$date_debut, $date_fin]);
+        //dd($requete);
         if(!empty($secteur)):
             $requete = $requete->whereIn('secteur', $secteur);
+            $lesPSecteurs = Secteur::whereIn('id', $secteur)->get()->toArray();
+        else:
+            $lesPSecteurs = [];
         endif;
         if(!empty($annonceur)):
             $requete = $requete->whereIn('annonceur', $annonceur);
+            $lesPAnnonceurs = Annonceur::whereIn('id', $annonceur)->get()->toArray();
+        else:
+            $lesPAnnonceurs = [];
         endif;
         if(!empty($media)):
             $requete = $requete->whereIn('media', $media);
+            $lesPMedias = Media::whereIn('id', $media)->get()->toArray();
+        else:
+            $lesPMedias = [];
         endif;
         if(!empty($support)):
             $requete = $requete->whereIn('support', $support);
+            $lesPSupports = Support::whereIn('id', $support)->get()->toArray();
+        else:
+            $lesPSupports = [];
         endif;
+        $donneesDuFormulaire = $donnees ;
         $data = $requete->orderBy('date', 'ASC')->get()->toArray();
-        $lesSpeednews = self::getSpeednews();
         $lesDonnees = self::makeReportingData($data);
+        $lesSpeednews = $lesDonnees['lesSpeednews'];
         $route = route('client.formvalider');
         $secteurs = Secteur::orderBy('id')->get()->toArray();
         $medias = Media::orderBy('id')->get()->toArray();
         $data = compact('lesDonnees','route','date_fin','date_debut', 'hauteur', 
-                        'hauteur2', 'lesSpeednews', 'secteurs', 'medias') ;
+                        'hauteur2', 'lesSpeednews', 'secteurs', 'medias', 'donneesDuFormulaire', 'lesPAnnonceurs', 'lesPSupports', 'lesPMedias', 'lesPSecteurs') ;
         return view('clients-v2.index', $data) ;
     }
     public static function formReport(Request $request){
@@ -81,6 +97,7 @@ class DataController extends Controller
 
     public static function makeReportingData(array $donnees):array{
         $param = self::$param ;
+        $lesMediasId = [];
         $tableaux = [] ;
         foreach($param AS $k => $v):
             $var = "les".ucfirst($k)."s" ;
@@ -106,8 +123,11 @@ class DataController extends Controller
         endforeach;
         foreach($donnees AS $row):
             extract($row);
+            if(!in_array($media['id'], $lesMediasId)):
+                $lesMediasId[] = $media['id'];     
+            endif;
             $tarif =  $investissement + $tarif ;
-            $insertion = $media['id'] == 61 ? $nombre : 1 ;
+            $insertion = $media['id'] == 6 ? $nombre : 1 ;
             $raisonsociale = $annonceur['raisonsociale'] ;
             foreach($param AS $k => $v):
                 if(is_array($$k)):
@@ -157,20 +177,10 @@ class DataController extends Controller
         $data['partDeVoixParMediaEtParAnnonceur'] = $partDeVoixParMediaEtParAnnonceur;
         $data['investParMediaEtParSupport'] = $investParMediaEtParSupport;
         $data['detailDesCampagnes'] = $detailDesCampagnes;
-        //dd($investParMedia, $investParFormat, $investParTypeservice, $investParMediaEtParAnnonceur, $planMedia);
-        /*
-        foreach($param AS $v):
-            $var = "les".ucfirst($v) ;
-            $parItem[$v] = $$var ;
-        endforeach ;
-        $speedNewsElt['campagnetitle'] = array_keys($detailDesCampagnes) ;
-        $speednewTbody = self::makeSpeednewsTable($speedNewsElt, $detailDesCampagnes) ;
-        $lesDocCampagnes = self::getAllDocCampagne($speedNewsElt) ;
-        Session::put('docCampagnes', $lesDocCampagnes) ;
-        Session::put('detailDesCampagnes', $detailDesCampagnes) ;
-        $parItem['date'] = $lesDate ;
-        $parItem['dateMois'] = $dateMois ;
-        //*/
+        $lesCid = array_keys($detailDesCampagnes);
+        
+        $lesSpeednews = self::getSpeednews($lesCid, $lesMediasId);
+        $data['lesSpeednews'] = $lesSpeednews;
         return $data ;
     }
     public static function pushInArray(&$tab, $val, $unique = true) {
@@ -288,10 +298,17 @@ class DataController extends Controller
         endif;
     }
 
-    public static function getSpeednews(){
-        $dat = Speednew::with(['media:id,name,code', 'support:id,name', 'campagnetitle.docampagnes'])
-                        ->with('campagnetitle.operation.annonceur:id,raisonsociale')
-                        ->orderBy('dateajout', 'DESC')->get()->toArray();
+    public static function getSpeednews($lesCid = [], $lesMediasId = []){
+        $requete = Speednew::with(['media:id,name,code', 'support:id,name', 'campagnetitle.docampagnes'])
+                        ->with('campagnetitle.operation.annonceur:id,raisonsociale');
+                        
+        if($lesCid):
+            $requete = $requete->whereIn('campagnetitle', $lesCid);
+        endif;                        
+        if($lesMediasId):
+            $requete = $requete->whereIn('media', $lesMediasId);
+        endif;
+        $dat = $requete->orderBy('dateajout', 'DESC')->get()->toArray();
         $data = [];
         foreach($dat AS $r):
             $media_id = $r['media']['id'];

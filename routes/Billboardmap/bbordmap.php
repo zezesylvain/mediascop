@@ -1,8 +1,10 @@
 <?php
 
 Route::group(['namespace' => 'Billboardmap','prefix' => 'bbordmap', 'middleware' => ['auth','logConnexion']],function() {
-    Route ::get ( '/v2', 'BillBoardMapController@home' ) -> name ( 'bbmap.home');
-    Route ::get ( '/', 'BillBoardMapController@accueil' ) -> name ( 'bbmap.accueil');
+    Route ::get ( '/v2', 'BillBoardMapController@home' ) -> name ( 'bbmap.v2');
+    Route ::get ( '/v3', 'BillBoardMapController@accueil3' ) -> name ( 'bbmap.accueil3');
+    //Route ::get ( '/', 'BillBoardMapController@accueil' ) -> name ( 'bbmap.accueil');
+    Route ::get ( '/', 'BillBoardMapController@accueil' ) -> name ( 'bbmap.home');
     Route ::get ( 'gestion-localites', 'BillBoardMapController@gestionLocalite' ) -> name ( 'bbmap.localite');
     Route ::get ( 'update-localites/{table}/{id}', 'BillBoardMapController@updateLocalite' ) -> name ( 'bbmap.updateLocalite');
     Route ::get ( 'panneaux/new', 'BillBoardMapController@newPanneau' ) -> name ( 'bbmap.panneau');

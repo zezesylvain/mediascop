@@ -10,11 +10,30 @@
 <script src="{{asset ("template/js/chosen/chosen.jquery.js")}}"></script>
 <script src="{{asset ("template/js/chosen/chosen-active.js")}}"></script>
 
+<script src="{{ asset('js/flatpickr.min.js') }}"></script>
+<script src="{{ asset('js/flatpickrlangfr.js') }}"></script>
+
+{{--
 <link href="{{asset("softs/jquery.datepick/css/jquery.datepick.css")}}" rel="stylesheet">
 <script src="{{asset("softs/jquery.datepick/js/jquery.plugin.min.js")}}"></script>
 <script src="{{asset("softs/jquery.datepick/js/jquery.datepick.js")}}"></script>
 <script src="{{asset("softs/jquery.datepick/js/jquery.datepick-fr.js")}}"></script>
+--}}
 <script>
+    $( function() {
+        $("#startPicker,#endPicker").flatpickr(
+            {
+                dateFormat : 'Y-m-d',
+                altFormat : 'j/m/Y',
+                altInput : true,
+                allowInput : true,
+                locale : 'fr'
+            }
+        );
+    } );
+</script>
+
+{{--<script>
     $(function() {
         $('.periodeDates').datepick({rangeSelect: true,});
         $('.avantDate').datepick({maxDate: 0});
@@ -44,7 +63,7 @@
             return changeDate(ladate,key);
         }
     });
-</script>
+</script>--}}
 
 <script>
     $(document).ready(function () {

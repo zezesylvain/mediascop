@@ -33,7 +33,7 @@
                             <div class="col-sm-6 form-group{{ $errors->has('parent') ? ' has-error' : '' }}">
                                 <div class="chosen-select-single mg-b-20">
                                     <label for="selectItem">Filtre sur Localité</label>
-                                    <select  class="form-control" name="parent" id="selectItem" tabindex="-1" onchange="sendData('localite='+this.value,'{{route('ajax.getFilsLocalite')}}','selectItem')">
+                                    <select  class="form-control" name="parent" id="selectItem" tabindex="-1" onchange="sendData('localite='+this.value,'{{route('ajax.getFilsLocalite')}}','selectItem');getLatLngLocalite(this.value)">
                                         <option value="0">Choisir une localite</option>
                                         @foreach($localites as $r)
                                             @php($selected = isset($localite) && $localite['parent'] == $r['id'] ? "selected" : "")

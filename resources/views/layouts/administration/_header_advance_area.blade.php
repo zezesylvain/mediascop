@@ -42,14 +42,5 @@
     </div>
 </div>
 <!-- Mobile Menu end -->
-<!--
-<div class="breadcome-area">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                @include("layouts.administration._breadcome_area")
-            </div>
-        </div>
-    </div>
-</div>
--->
+
+@yield("breadcome-area")

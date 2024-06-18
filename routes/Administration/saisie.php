@@ -57,4 +57,10 @@ Route::group(['namespace' => 'Administration','prefix' => 'saisie', 'middleware'
     Route::get('type-de-service/new', 'SaisieController@newTypeDeService')->name('saisie.newTypeDeService');
     Route::post('ajouter-point-hors-media', 'SaisieController@ajouterPointHorsMedia')->name('ajax.ajouterPointHorsMedia');
     Route::post('delete-point-hors-media', 'SaisieController@deletePointsHorsMedia')->name('ajax.deletePointsHorsMedia');
+
+    Route::post('chercher-type-service','CampagnesController@getTypeService')->name('ajax.getTypeService');
+
+    Route::post('validerTitreCampagne','CampagnesController@validerTitreCampagne')->name('ajax.validerTitreCampagne');
+
+    Route::post('getMobileProfil','CampagnesController@getMobileProfil')->name('ajax.getMobileProfil');
 });

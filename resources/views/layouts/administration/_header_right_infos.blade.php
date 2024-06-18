@@ -9,7 +9,9 @@
     <li class="nav-item">
         @include("layouts.administration._dropdown_settings")
     </li>
+    <?php /*?>
     <li class="nav-item nav-setting-open"><a href="#" data-toggle="dropdown" role="button" aria-expanded="false" class="nav-link dropdown-toggle"><i class="fa fa-tasks"></i></a>
          @include("layouts.administration._dropdown_settings_wrap")
     </li>
+    <?php //*/?>
 </ul>

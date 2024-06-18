@@ -26,8 +26,9 @@
                 </div>
             </div>
         </div>    
-
-    @foreach($parAnnonceur AS $item => $tab)
+    @php($lesItems = ['media', 'typecom', 'typeservice', 'format', 'cible'])
+    @foreach($lesItems AS $item)
+        @php($tab = $parAnnonceur[$item] ?? [])
         @if(!empty($tab))
             <div class="col-xs-12 bordered">
             <div class="row">

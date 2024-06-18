@@ -46,7 +46,7 @@ $routeUpdate = !array_key_exists ('routeUpdate',$options) ? "updateData" : $opti
                                                     $dateFormat = $columnOptions['dateFormat'];
                                                 @endphp
                                             @endif
-                                            <th data-field="{{$v}}" data-editable="{{$dataEditable}}" data-editable-type="{{$type ?? "text"}}" data-editable-source="[{{$source ?? ""}}]" data-editable-viewformat="{{$dataViewFormat ?? ""}}" data-editable-format="{{$dateFormat ?? ""}}">{!! $formatTableHeader($v) !!}</th>
+                                            <th data-field="{{$v.'&'.$databaseTable}}" data-editable="{{$dataEditable}}" data-editable-type="{{$type ?? "text"}}" data-editable-source="[{{$source ?? ""}}]" data-editable-viewformat="{{$dataViewFormat ?? ""}}" data-editable-format="{{$dateFormat ?? ""}}" data-editable-url="{{ route('updatexEditable') }}" >{!! $formatTableHeader($v) !!}</th>
                                         @endif
                                     @endforeach
                                     <th></th>
@@ -66,13 +66,21 @@ $routeUpdate = !array_key_exists ('routeUpdate',$options) ? "updateData" : $opti
                                                     $position = "test-$k-$itemId";
                                                     ?>
                                                     <td>{!! $row[$k] !!}</td>
+{{--
+                                                    <td id="test-{{ $k }}-{{ $row['id'] }}">
+                                                        <span id="test-{{ $k }}-{{ $row['id'] }}">
+                                                            {!! $inlineTexte($itemId, $row[$k] , $k, $databaseTable, "texte", $position) !!}
+                                                        </span>
+
+                                                    </td>
+--}}
                                                 @endif
                                             @endif
                                         @endforeach
                                         <td>
                                             <a title="Modifier" href="{{route($routeUpdate,[$table,$row["id"]])}}" class="btn btn-link"><i class="fa fa-pencil"></i></a>
 
-                                            <a title="Supprimer" href="#" class="btn btn-link" data-toggle="modal" data-target="#PrimaryModalhdbgcl"><i class="fa fa-trash"></i></a>
+                                            <a title="Supprimer" href="#" class="btn btn-link" data-toggle="modal" id="modalDeleteUpdateDataItem" data-target="#PrimaryModalSuppr" onclick="suprimerData('{{ $table }}','{{ $row["id"] }}')" ><i class="fa fa-trash"></i></a>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -86,41 +94,53 @@ $routeUpdate = !array_key_exists ('routeUpdate',$options) ? "updateData" : $opti
     </div>
 </div>
 
-<div id="PrimaryModalhdbgcl" class="modal modal-adminpro-general default-popup-PrimaryModal fade" role="dialog">
-    <div class="modal-dialog">
+<div id="PrimaryModalSuppr" class="modal modal-adminpro-general default-popup-PrimaryModal fade" role="dialog">
+    <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header header-color-modal bg-color-1">
-                <h4 class="modal-title">BG Color Header Modal</h4>
+                <h4 class="modal-title">Suppression de l'enregistrement</h4>
                 <div class="modal-close-area modal-close-df">
                     <a class="close" data-dismiss="modal" href="#"><i class="fa fa-close"></i></a>
                 </div>
             </div>
             <div class="modal-body">
-               <div id="PrimaryModalhdbgclItem"></div>
-            </div>
-            <div class="modal-footer">
-                <a data-dismiss="modal" href="#">Cancel</a>
-                <a href="#">Process</a>
+                <div id="PrimaryModalhdbgclItem"><i class="fa fa-trash modal-check-pro"></i>
+                    <h2>Êtes vous sur ?</h2>
+                    <form action="{{ route('param.deleteRegister') }}" method="post" id="formDeleteRegisterItem">
+                        {{ csrf_field() }}
+                        <input type="hidden" id="laTableItem" name="laTable" value="">
+                        <input type="hidden" id="laTableIdItem"  name="laTableId" value="">
+                        <div class="button-style-four btn-mg-b-10">
+                            <button type="submit" class="btn btn-custon-rounded-four btn-danger">Oui</button>
+                            <a type="button" href="#" class="btn btn-custon-rounded-four btn-primary" data-dismiss="modal">Non</a>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <script type="text/javascript">
-    $(document).ready(function () {
-        $.fn.editable.defaults.url = '{{route ('xEditableUpdate')}}';
-        $.fn.editable.defaults.params = function (params) {
-            params._token = $("meta[name=_token]").attr("content");
-            params.table = "{{$databaseTable}}";
-            params.source = [
-                {value: 1, text: 'Male'},
-                {value: 2, text: 'Female'}
-            ]
-            return params;
-
-        };
-
-        })
+    function suprimerData(table,id) {
+        //const url = document.location.origin+'/delete-data/:p1/:p2'
+        //const newurl = url.replace(':p1',table).replace(':p2',id)
+        $.ajax({
+            type: 'POST',
+            url: '{{ route('param.deleteData') }}',
+            dataType: 'json',
+            data: {
+                table: table,
+                id: id
+            },
+            success: function (result) {
+                $('#laTableItem').val(result.table);
+                $('#laTableIdItem').val(result.id);
+            }
+        });
+        //document.getElementById("modalDeleteUpdateDataItem").setAttribute('href',url);
+        //$('#modalDeleteUpdateDataItem').prop("href", newurl)
+    }
 </script>
 
 @endif

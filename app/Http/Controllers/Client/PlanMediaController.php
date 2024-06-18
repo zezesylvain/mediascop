@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Client;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-
+use Illuminate\Support\Str;
 use App\Helpers\DbTablesHelper;
 use App\Http\Controllers\core\FunctionController;
 use Illuminate\Support\Facades\Config;
@@ -185,7 +185,8 @@ class PlanMediaController extends Controller
                         'lesDatesMoisForPM', 'tabSupports', 'infoCampagne');
     }
     public static function GenerateInverseColor($hexcolor){
-
+        //
+        return self::couleur_police_sur_fond($hexcolor);
         $hexcolor       = trim($hexcolor);
 
         $r = hexdec(substr($hexcolor,0,2));
@@ -194,5 +195,33 @@ class PlanMediaController extends Controller
         $yiq = (($r*299)+($g*587)+($b*114))/1000;
         return ($yiq >= 128) ? 'black' : 'white';
 
+}
+    public static function couleur_police_sur_fond($couleur_hex) {
+        // Convertir la couleur hexadécimale en RGB
+        $string = $couleur_hex;
+
+        if (!Str::startsWith($string, '#')):
+            $couleur_hex = "#".$string;
+        endif;
+        if ($couleur_hex == '#'):
+            return "#FFFFFF"; 
+        endif;
+        if (preg_match('/^#?[a-fA-F0-9]{6}$/', $couleur_hex) === 1):
+            $r = hexdec(substr($couleur_hex, 1, 2));
+            $g = hexdec(substr($couleur_hex, 3, 2));
+            $b = hexdec(substr($couleur_hex, 5, 2));
+            // Calculer la luminance de la couleur
+            $luminance = (0.2126 * $r + 0.7152 * $g + 0.0722 * $b) / 255;
+            // Déterminer si la couleur de police devrait être blanche ou noire en fonction de la luminance
+            if ($luminance > 0.5):
+                return "#000000"; // Noir
+            else:
+                return "#FFFFFF"; // Blanc
+            endif;
+        else:
+            return "#000000"; // Noir
+        endif;
+        //
+        
 }
 }

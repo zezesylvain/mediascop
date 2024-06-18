@@ -26,6 +26,7 @@ class ReportingController extends AdminController
         return self::built(compact('date_debut', 'date_fin', 'secteur')) ;
     }
     public static function built($donnees){
+        //dd($donnees);
         $hauteur = 400;
         $hauteur2 = 500;
         $tblSecteurs = DbTablesHelper::dbTable("DBTBL_SECTEURS",'db') ;
@@ -125,25 +126,39 @@ class ReportingController extends AdminController
             foreach($listeSpeciale AS $it):
                 self::incrementValueInTripleArray($parAnnonceur[$it], $annonceur, $$it, $tarif, $insertion) ;
             endforeach;
-            self::incrementValueInTripleArray($parAnnonceurEtParMedia, $annonceur, $media, $tarif, $insertion) ;
             self::incrementValueInMultiArray($investParSecteurEtParAnnonceur, $secteur, $annonceur, $tarif) ;
             self::incrementValueInMultiArray($investParAnnonceurEtParFormat, $annonceur, $format, $tarif) ;
             self::incrementValueInMultiArray($investParAnnonceurEtParNature, $annonceur, $nature, $tarif) ;
             self::incrementValueInMultiArray($investParAnnonceurEtParCible, $annonceur, $cible, $tarif) ;
             self::incrementValueInMultiArray($investParAnnonceurEtParMedia, $annonceur, $media, $tarif) ;
             self::incrementValueInMultiArray($investParMediaEtParAnnonceur, $media, $annonceur, $tarif) ;
-            self::incrementValueInMultiArray($partDeVoixParMediaEtParAnnonceur, $media, $annonceur, $insertion) ;
             self::incrementValueInMultiArray($investParMediaEtParSupport, $annonceur, $support, $tarif) ;
             self::incrementValueInMultiArray($investParMediaEtParSupport, $annonceur, $support, $tarif) ;
             self::incrementValueInArray($investParAnnonceur, $annonceur, $tarif) ;
             self::incrementValueInArray($investParNature, $nature, $tarif) ;
             self::incrementValueInArray($investParCible, $cible, $tarif) ;
             self::incrementValueInArray($investParFormat, $format, $tarif) ;
-            self::incrementValueInArray($partDeVoixParAnnonceur, $annonceur, $insertion) ;
-            self::incrementValueInArray($partDeVoixParMedia, $media, $insertion) ;
             self::incrementValueInArray($investParMedia, $media, $tarif) ;
             self::makePlanMedia($planMedia, $annonceur, $media, $row['date'], $insertion, $tarif) ;
-            self::detailCampagne($detailDesCampagnes, $row) ;
+            if($media == 6):
+                self::incrementValueInArray($partDeVoixParAnnonceur, $annonceur, $insertion) ;
+                if (!array_key_exists($key1, $parAnnonceurEtParMedia)):
+                    $parAnnonceurEtParMedia[$annonceur][$media] = ['invest' => $tarif, 'insertion' => $insertion];
+                else :
+                    self::incrementValueInMultiArray($parAnnonceurEtParMedia[$annonceur], $media, 'invest', $tarif) ;
+                    $parAnnonceurEtParMedia[$annonceur][$media]['insertion'] = max($parAnnonceurEtParMedia[$annonceur][$media]['insertion'], $insertion) ;
+                endif;
+                $z = $partDeVoixParMediaEtParAnnonceur[$media][$annonceur] ?? 0;
+                $partDeVoixParMediaEtParAnnonceur[$media][$annonceur] = max($z, $insertion) ;
+                $z = $partDeVoixParMedia[$media] ?? 0;
+                $partDeVoixParMedia[$media] = max($z, $insertion) ;
+            else:
+                self::incrementValueInMultiArray($partDeVoixParMediaEtParAnnonceur, $media, $annonceur, $insertion) ;
+                self::incrementValueInTripleArray($parAnnonceurEtParMedia, $annonceur, $media, $tarif, $insertion) ;
+                self::incrementValueInArray($partDeVoixParAnnonceur, $annonceur, $insertion) ;
+                self::incrementValueInArray($partDeVoixParMedia, $media, $insertion) ;
+            endif;
+                self::detailCampagne($detailDesCampagnes, $row) ;    
         endforeach;
         foreach($param AS $v):
             $var = "les".ucfirst($v) ;
@@ -180,12 +195,18 @@ class ReportingController extends AdminController
         elseif(!array_key_exists($date, $array[$annonceur][$media])):
             $array[$annonceur][$media][$date] = ['insertion' => $ins, 'budget' => $invest ] ;
             $array[$annonceur][$media]['invest'] += $invest ;
-            $array[$annonceur][$media]['ins'] += $ins ;
+            $array[$annonceur][$media]['ins'] = $media == 6 ? max($array[$annonceur][$media]['ins'], $ins) : $array[$annonceur][$media]['ins'] + $ins ;
         else:
-            $array[$annonceur][$media][$date]['insertion'] += $ins ;
+            if($media == 6):
+                $array[$annonceur][$media][$date]['insertion'] = max($ins, $array[$annonceur][$media][$date]['insertion']) ;
+                $array[$annonceur][$media]['ins'] = max($ins, $array[$annonceur][$media]['ins']) ;
+            else:
+                $array[$annonceur][$media][$date]['insertion'] += $ins ;
+                $array[$annonceur][$media]['ins'] += $ins ;
+            endif;
             $array[$annonceur][$media][$date]['budget'] += $invest ;
             $array[$annonceur][$media]['invest'] += $invest ;
-            $array[$annonceur][$media]['ins'] += $ins ;
+            
         endif;
     }
     public static function getParamName():array{
@@ -680,7 +701,7 @@ class ReportingController extends AdminController
                 foreach ($donnees as $r):
                     $tab[$r['id']] = $r['id'];
                 endforeach;
-                dd($tab);
+                //dd($tab);
                 $request->session ()->put ("formvar.$sessionName", $tab);
                 $request->session ()->save ();
             endif;

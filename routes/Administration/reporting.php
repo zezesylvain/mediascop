@@ -8,5 +8,8 @@ Route::group(['namespace' => 'Administration', 'prefix' => 'reporting', 'middlew
     Route::post('form-rapport', 'RapportController@getFormRapport')->name('ajax.getFormRapport');
     Route::post('supprimer-file-rapport', 'RapportController@delFormRapport')->name('ajax.delfile');
     Route::get('download-file/{cid}', 'RapportController@downloadFile')->name('reporting.downloadFile');
+    Route::get('supprimer-rapport/{rapportID}', 'RapportController@deleteRapport')->name('reporting.deleteRapport');
+
+    Route::get('get-csv/{file}', 'TableauDeBordController@getCSV')->name('reporting.getCSV');
 });
 

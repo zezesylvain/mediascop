@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use App\Models\Menu;
 
 class MenuMakerController extends Controller {
 
@@ -56,8 +57,15 @@ class MenuMakerController extends Controller {
             endif;
         endif;
     }
-
+    
+    public static function menuTable(){
+        $tabM = Menu::with('groupemenu', 'role', 'menu_target', 'icone')->get()->toArray();
+        //dd($tabM);
+    }
+    
     public static function makeTabMenu() {
+        //$tabM = Menu::with('groupemenu', 'role', 'menu_target', 'icone')->get()->toArray();
+        //dd($tabM);
         $moduleID = self::getModuleCourant();
        // Session::forget("tabMenu");
        // Session::forget("groupTabMenu");
@@ -111,63 +119,6 @@ class MenuMakerController extends Controller {
             endif;
             if (count($groupTab)):
                 Session::put("groupTabMenu.$moduleID", $groupTab);
-            endif;
-        endif;
-    }
-
-    public static function makeTabMenuOLD() {
-        if (!Session::has("tabMenu") && !Session::has("groupTabMenu")) :
-            $tabl = DbTablesHelper::dbTable('DBTBL_MENUS');
-            $table = FunctionController::getTableName($tabl);
-            $UserLevel = Session::get('UserLevel');
-            $sql = "SELECT * FROM $table WHERE level_menu <= '" . $UserLevel . "' AND parent = %d ORDER BY rang ASC";
-            $result = DB::select(DB::raw(sprintf($sql, 0)));
-            $tabMenu = [];
-            $groupTab = [];
-            foreach ($result AS $item):
-                $groupTab[$item->name] = [];
-                $lemenu = [];
-                $lemenu["label"] = $item->name;
-                $lemenu["icone"] = $item->icone;
-                if ($item->url == "#"):
-                    $parent = $item->id;
-                    $submenu = DB::select(DB::raw(sprintf($sql, $parent)));
-                    $lessousmenus = [];
-                    foreach ($submenu AS $sm):
-                        $lesousmenu = [];
-                        $groupTab[$sm->name] = [];
-                        if ($sm->url == "#"):
-                            $p = $sm->id;
-                            $tabssm = DB::select(DB::raw(sprintf($sql, $p)));
-                            $lessoussousmenus = [];
-                            foreach ($tabssm AS $ssm):
-                                $groupTab[$item->name][] = $ssm->url;
-                                $groupTab[$sm->name][] = $ssm->url;
-                                $lesoussousmenu ["url"] = $ssm->url;
-                                $lesoussousmenu ["label"] = $ssm->name;
-                                $lessoussousmenus[] = $lesoussousmenu;
-                            endforeach;
-                            $lesousmenu["url"] = $lessoussousmenus;
-                        else:
-                            $groupTab[$item->name][] = $sm->url;
-                            $groupTab[$sm->name][] = $sm->url;
-                            $lesousmenu["url"] = $sm->url;
-                        endif;
-                        $lesousmenu["label"] = $sm->name;
-                        $lessousmenus[] = $lesousmenu;
-                    endforeach;
-                    $lemenu["url"] = $lessousmenus;
-                else:
-                    $lemenu["url"] = $item->url;
-                    $groupTab[$item->name][] = $item->url;
-                endif;
-                $tabMenu[] = $lemenu;
-            endforeach;
-            if (count($tabMenu)):
-                Session::put("tabMenu", $tabMenu);
-            endif;
-            if (count($groupTab)):
-                Session::put("groupTabMenu", $groupTab);
             endif;
         endif;
     }
@@ -236,17 +187,18 @@ MENUT;
     {
         $id = str_replace(" ", "", $label);
         $base = env("APP_URL");
-        $mask = "
-                 <li>
-                        <a title=\"%s\" href=\"$base%s\" target=\"% s\"><i class=\"fa fa-%s sub-icon-mg\" aria-hidden=\"true\" ></i> <span class=\"mini-sub-pro\">%s</span></a>
-                 </li>
-                 ";
+        $mask = "<li class='%s'>
+                        <a title=\"%s\" href=\"%s\" %s ><i class=\"fa fa-%s sub-icon-mg\" aria-hidden=\"true\" ></i> <span class=\"mini-sub-pro\">%s</span></a>
+                 </li>";
         $li = "";
+        $currentUrl = Route::current()->uri();
         foreach ($tab AS $it):
             $menIcone = FunctionController::getChampTable (DbTablesHelper::dbTable ('DBTBL_ICONES'),$it['icone']);
-            $target = $it['mtarget'] !== 1 ? FunctionController::getChampTable(DbTablesHelper::dbTable('DTBL_MENU_TARGETS'),
-                $it['mtarget']) : "";
-            $li .= sprintf($mask, $it['label'], $it["url"], $target, $menIcone, $it["label"]);
+            $target = '';
+            //$target = $it['mtarget'] !== 1 ? "target='".FunctionController::getChampTable(DbTablesHelper::dbTable('DTBL_MENU_TARGETS'),$it['mtarget'])."'" : "";
+            $baseUrl = str_replace('\\','/',$base.$it['url']);
+            $menuActive = $currentUrl === substr($it['url'],1-strlen($it['url']),strlen($it['url'])) ? 'menu-active' : '';
+            $li .= sprintf($mask, $menuActive, $it['label'], $baseUrl, $target, $menIcone, $it["label"]);
         endforeach;
         $expan = self::expansion($label);
         $expansion = $expan ? " aria-expanded='true'" : "";

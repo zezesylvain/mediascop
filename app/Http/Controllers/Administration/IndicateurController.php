@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Administration;
 
 use App\Helpers\DbTablesHelper;
 use App\Http\Controllers\core\FunctionController;
+use App\models\Indicateur;
 use App\WoodyModel;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -15,12 +16,14 @@ class IndicateurController extends Controller
     protected $userID;
     protected $model;
     protected $mesIndicateurs = [];
+    public $nbreIndication = 0;
 
     public function __construct (int $userID)
     {
         $this->userID = $userID;
         $this->model = new WoodyModel();
         $this->mesIndicateurs = $this->mesIndicateurs ();
+        $this->nbreIndication = count($this->mesIndicateurs);
     }
 
 
@@ -33,6 +36,7 @@ class IndicateurController extends Controller
 
     /**
      * @param string $date
+     * @return array
      */
     public function nouvelleCampagneDuJour(string $date,int $valider = 1):array {
         $tcampagne = $valider == 1 ? DbTablesHelper::dbTablePrefixeOff('DBTBL_CAMPAGNES','db') : DbTablesHelper::dbTablePrefixeOff('DBTBL_CAMPAGNETITLE_NON_VALIDES','db');
@@ -91,9 +95,11 @@ class IndicateurController extends Controller
         $nbreCampagnes = count ($this->mesCampagnes (0,1,date ('Y-m-d')));
         return view ("administration.Indicateurs.nbreCampagnesNonValidees",compact ('nbreCampagnes'))->render ();
     }
+
     /**
      * Les nouvelles campagnes saisies par l'utilisateur
      * @param string $date
+     * @return string
      */
     public function mesNouvelleCampagneDuJour(string $date):string {
         $nbreCampagnes = count ($this->mesCampagneDuJour ($date));
@@ -103,7 +109,7 @@ class IndicateurController extends Controller
     /**
      * Le nombre des nouvelles campagnes saisies par l'utilisateur
      * @param string $date
-     * @return int
+     * @return int|string
      */
     public function lesNouvelleCampagneDuJour(string $date):string {
        $nbreCampagnes = $this->nbreNouvelleCampagneDuJour ($date);
@@ -342,8 +348,9 @@ class IndicateurController extends Controller
         
     }
     
-    public function mesIndicateurs(){
-        Session::forget ("mesIndicateurs");
+    public function mesIndicateurs()
+    {
+        //$indication = Indicateur::with('profils_indicateur')->get()->toArray();
         if (!Session::has ("mesIndicateurs")):
             $userProfil = FunctionController::getChampTable (FunctionController::getTableName (DbTablesHelper::dbTable ('DBTBL_USERS')),$this->userID,"profil");
 

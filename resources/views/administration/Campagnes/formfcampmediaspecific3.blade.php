@@ -1,5 +1,5 @@
 
-{{--<div class="col-xs-6 col-sm-3 col-lg-2 form-group-inner">
+<div class="col-xs-6 col-sm-3 col-lg-2 form-group-inner">
     <label for="presse_calibre"> Calibre </label>
     <select class="form-control" id="presse_calibre" name="presse_calibre">
         <option value="">Choisir un calibre</option>
@@ -16,7 +16,7 @@
             <option value="{{$row->id}}">{{$row->name}}</option>
         @endforeach
     </select>
-</div>--}}
+</div>
 <input id="duree" name="duree" value="{{ $defaultvalue["duree"] }}" type="hidden">
 <input id="mobilemessage" name="mobilemessage" value="" type="hidden">
 <input id="internet_dimension" name="internet_dimension" value="{{$defaultvalue["internet_dimension"] }}" type="hidden">

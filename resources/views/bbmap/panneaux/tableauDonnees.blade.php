@@ -54,7 +54,7 @@
                     @foreach($rrs as $rr)
                         <tr>
                             @if($cpt === 0)
-                                <th style="vertical-align: middle;text-align: center;" rowspan="{{ $rsp }}">
+                                <th style="vertical-align: middle;text-align: left;" rowspan="{{ $rsp }}">
                                     {!! $localite !!}
                                 </th>
                             @endif

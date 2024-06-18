@@ -33,4 +33,9 @@ class User extends Authenticatable
     public function pensees(){
         return $this->hasMany (Pensee::class);
     }
+
+    public function userSecteur()
+    {
+        return $this->hasMany(UserSecteur::class,'user');
+    }
 }

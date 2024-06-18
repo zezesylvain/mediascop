@@ -4,7 +4,7 @@
 
 <!-- bootstrap JS
     ============================================ -->
-<script src="{{asset("template/js/bootstrap.min.js")}}"></script>
+<script src="{{asset("template/js/bootstrap.min.js")}}" ></script>
 <!-- wow JS
     ============================================ -->
 <script src="{{asset("template/js/wow.min.js")}}"></script>
@@ -33,9 +33,6 @@
 <script src="{{asset("template/js/metisMenu/metisMenu-active.js")}}"></script>
 <!-- morrisjs JS
     ============================================ -->
-<script src="{{asset("template/js/morrisjs/raphael-min.js")}}"></script>
-<script src="{{asset("template/js/morrisjs/morris.js")}}"></script>
-<script src="{{asset("template/js/morrisjs/morris-active.js")}}"></script>
 <!-- morrisjs JS
     ============================================ -->
 <script src="{{asset("template/js/sparkline/jquery.sparkline.min.js")}}"></script>
@@ -82,8 +79,8 @@
 <script src="{{asset ("template/js/colorpicker/color-picker-active.js")}}"></script>
 <!-- datapicker JS
 	============================================ -->
-<script src="{{asset ("template/js/datapicker/bootstrap-datepicker.js")}}"></script>
-<script src="{{asset ("template/js/datapicker/datepicker-active.js")}}"></script>
+{{--<script src="{{asset ("template/js/datapicker/bootstrap-datepicker.js")}}"></script>--}}
+{{--<script src="{{asset ("template/js/datapicker/datepicker-active.js")}}"></script>--}}
 
 <!-- chosen JS
 	============================================ -->
@@ -95,62 +92,75 @@
 <script src="{{asset ("template/js/select2/select2-active.js")}}"></script>
 <!-- touchspin JS
 ============================================ -->
-<script src="{{asset ("template/js/touchspin/jquery.bootstrap-touchspin.min.js")}}"></script>
-<script src="{{asset ("template/js/touchspin/touchspin-active.js")}}"></script>
+<script src="{{asset ("template/js/touchspin/jquery.bootstrap-touchspin.min.js")}}" defer></script>
+<script src="{{asset ("template/js/touchspin/touchspin-active.js")}}" defer></script>
 <!-- colorpicker JS
 ============================================ -->
-<script src="{{asset ("template/js/colorpicker/jquery.spectrum.min.js")}}"></script>
-<script src="{{asset ("template/js/colorpicker/color-picker-active.js")}}"></script>
+<script src="{{asset ("template/js/colorpicker/jquery.spectrum.min.js")}}" defer></script>
+<script src="{{asset ("template/js/colorpicker/color-picker-active.js")}}" defer></script>
 <!-- input-mask JS
 ============================================ -->
-<script src="{{asset ("template/js/input-mask/jasny-bootstrap.min.js")}}"></script>
+<script src="{{asset ("template/js/input-mask/jasny-bootstrap.min.js")}}" defer></script>
 <!-- duallistbox JS
 	============================================ -->
-<script src="{{asset ("template/js/duallistbox/jquery.bootstrap-duallistbox.js")}}"></script>
-<script src="{{asset ("template/js/duallistbox/duallistbox.active.js")}}"></script>
+<script src="{{asset ("template/js/duallistbox/jquery.bootstrap-duallistbox.js")}}" defer></script>
+<script src="{{asset ("template/js/duallistbox/duallistbox.active.js")}}" defer></script>
 
 <!-- dropzone JS
 	============================================ -->
-<script src="{{asset ("template/js/dropzone/dropzone.js")}}"></script>
+<script src="{{asset ("template/js/dropzone/dropzone.js")}}" defer></script>
 
 <!-- tab JS
 	============================================ -->
 <script src="{{asset ("template/js/tab.js")}}"></script>
 
-<script src="{{asset ("softs/summernote-master/dist/summernote.js")}}"></script>
+<script src="{{asset ("softs/summernote-master/dist/summernote.js")}}" defer></script>
 {{--<script src="{{asset ("softs/DataTables/datatables.js")}}"></script>--}}
 
 <!-- summernote JS
 		============================================ -->
-<script src="{{asset ('template/js/summernote/summernote.min.js')}}"></script>
+<script src="{{asset ('template/js/summernote/summernote.min.js')}}" defer></script>
 <script src="{{asset ('template/js/summernote/summernote-active.js')}}"></script>
 
-<script src="{{asset('softs/dataTables11/jquery.dataTables.js')}}"></script>
-<script src="{{asset('softs/dataTables11/dataTables.bootstrap.js')}}"></script>
+<script src="{{asset('softs/dataTables11/jquery.dataTables.js')}}" defer></script>
+<script src="{{asset('softs/dataTables11/dataTables.bootstrap.js')}}" defer></script>
 
 <script src="{{asset ("softs/jscolor/jscolor.js")}}"></script>
 
+<script src="{{ asset('js/flatpickr.min.js') }}"></script>
+<script src="{{ asset('js/flatpickrlangfr.js') }}"></script>
 
-<link href="{{asset("softs/jquery.datepick/css/jquery.datepick.css")}}" rel="stylesheet">
-<script src="{{asset("softs/jquery.datepick/js/jquery.plugin.min.js")}}"></script>
-<script src="{{asset("softs/jquery.datepick/js/jquery.datepick.js")}}"></script>
-<script src="{{asset("softs/jquery.datepick/js/jquery.datepick-fr.js")}}"></script>
 <script>
-    $(function() {
-        $('.periodeDates').datepick({rangeSelect: true,});
-        $('.avantDate').datepick({maxDate: 0});
-        $('.apresDate').datepick({minDate: 0});
-        $('.datepickerjs').datepick({dateFormat: 'yyyy-mm-dd'});
-        $('.datetimepickerjs').datepick({dateFormat: 'yyyy-mm-dd',timeFormat:  "hh:mm:ss"});
-        
-    });
+    $( function() {
+        $(".avantDate").flatpickr(
+            {
+                dateFormat : 'Y-m-d',
+                altFormat : 'j/m/Y',
+                altInput : true,
+                allowInput : true,
+                locale : 'fr'
+            }
+        );
+    } );
+
+    function setfpdate(selecteur,dateStr) {
+        $('#'+selecteur+'').flatpickr({
+            dateFormat : 'Y-m-d',
+            enableTime : false,
+            altFormat : 'j/m/Y',
+            altInput : true,
+            locale : 'fr',
+            allowInput : true,
+            defaultDate : dateStr
+        });
+        //fp.set('defaultDate',dateStr);
+        //console.log(selecteur,dateStr);
+
+    }
+
 </script>
 
 <script type="text/javascript">
-    $(document).ready(function() {
-        $('.summernote').summernote();
-    });
-    
     $(document).ready(function() {
         $('.dataTable').dataTable();
         
@@ -165,47 +175,43 @@
         });
     
     });
+
+    function validerSaisie(db,dataId,k,route,resAction)
+    {
+        $.ajax({
+            method: "POST",
+            url: route,
+            data:{database:db,id:dataId,k:k },
+            dataType: "JSON",
+            cache: false,
+            processData: true,
+            async: false,
+        }).done(function (response) {
+            $('#'+resAction).html(response.valideBox);
+            $('#'+response.resAction+'').load(response.routeListeData)
+
+        })
+        ;
+    }
 </script>
 
-<script>
-    function listNotification() {
-        var url = "{{route ('ajax.checkNotification')}}";
+<script type="text/javascript">
+    function getLatLngLocalite(localite) {
         $.ajax({
-            type : "POST",
-            url : url ,
-            data : {
-                param : 'check',
-            },
-            dataType: "JSON",
-            success : function(result){
-                let notifCpt = result.notifs;
-                let inputCpt = parseInt($('#notifCompteurItem').val(),10);
-                if (notifCpt) {
-                    $('#linkNotifBulle span').css('display','flex').attr('title','Vous avez '+notifCpt+' notification(s).');
-                    $('#nbreNotifItem').text(notifCpt);
-                    $('#notifCompteurItem').val(notifCpt)
-                    $('#listeNotificationItem').html(result.listeNotif);
-                    if(notifCpt > inputCpt){
-                        $('#notifCompteurItem').val(notifCpt);
-                        mySoNiceSound('{{asset("softs/notificationSonore/0450.mp3")}}');
-                    }
-                }else {
-                    $('#nbreNotifItem').text(result.notifs);
-                    $('#linkNotifBulle span').css('display','none')
+            url: '{{ route('ajax.getLatLngLocalite') }}',
+            dataType: "json",
+            type: "Post",
+            async: true,
+            data: { localite: localite },
+            success: function (data) {
+                if (data.locID !== null)
+                {
+                    $('#latItem').val(data.res.latitude);
+                    $('#lngItem').val(data.res.longitude);
+                    initialize(data.res.latitude,data.res.longitude);
                 }
             }
-        });
+        })
     }
-
-    setInterval(function () {
-        listNotification();
-    },30000);
-
-    function mySoNiceSound(s)
-    {
-        var e=document.createElement('audio');
-        e.setAttribute('src',s);
-        e.play();
-    }
-
 </script>
+

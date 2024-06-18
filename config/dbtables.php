@@ -68,8 +68,8 @@ return [
     'DBTBL_MESSAGES'                     => ''.$prefixe.'messages',
     'DBTBL_USER_MESSAGES'                => ''.$prefixe.'user_messages',
     'DBTBL_PIECES_JOINTES'               => ''.$prefixe.'pieces_jointes',
-    'DBTBL_TYPE_DE_SERVICES'             => ''.$prefixe.'type_services',
-    'DBTBL_TYPE_SERVICES'                => ''.$prefixe.'type_services',
+    'DBTBL_TYPE_DE_SERVICES'             => ''.$prefixe.'typeservices',
+    'DBTBL_TYPE_SERVICES'                => ''.$prefixe.'typeservices',
     'DBTBL_TYPE_DE_PROMOS'               => ''.$prefixe.'type_promos',
     'DBTBL_TYPE_PROMOS'                  => ''.$prefixe.'type_promos',
     'DBTBL_COORDONNEES_HORS_MEDIAS'      => ''.$prefixe.'coordonnees_hors_medias',
@@ -82,7 +82,9 @@ return [
     'DBTBL_FUSION_TABLES_DEPENDANCES'    => ''.$prefixe.'fusion_tables_dependances',
     'DBTBL_USERS_ANNONCEURS'             => ''.$prefixe.'users_annonceurs',
     'DBTBL_NOTIFICATIONS'                => ''.$prefixe.'notifications',
-    'DBTBL_TYPECOMS'                    => ''.$prefixe.'typecoms',
-    'DBTBL_TYPESERVICES'                => ''.$prefixe.'typeservices',
+    'DBTBL_TYPECOMS'                     => ''.$prefixe.'typecoms',
+    'DBTBL_TYPESERVICES'                 => ''.$prefixe.'typeservices',
+    'DBTBL_LIEU_LOCALITES'               => ''.$prefixe.'lieu_localites',
+    'DBTBL_POINTS'                       => ''.$prefixe.'points',
 
 ];

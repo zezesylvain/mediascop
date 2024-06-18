@@ -104,6 +104,8 @@ Route::group(['namespace' => 'core','prefix' => '', 'middleware' => ['auth','log
     Route::get('table-field-default', 'TmaController@tableFieldDefault')->name('tableFieldDefault');
     Route::get('get-list-field', 'TmaController@getListTableField')->name('ajax.getListTableField');
     Route::post('add-default-field', 'TmaController@addTableField')->name('ajax.addTableField');
+
+    Route::post('checkRoleToProfil', 'TmaController@checkRoleToProfil')->name('ajax.checkRoleToProfil');
 });
 
 

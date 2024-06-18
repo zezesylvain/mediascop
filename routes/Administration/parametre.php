@@ -9,6 +9,7 @@ Route::group(['namespace' => 'Administration','prefix' => 'parametre', 'middlewa
     Route::get('supports/new', 'ParametreController@newSupports')->name('parametre.supports');
     Route::get('secteurs/new', 'ParametreController@newSecteur')->name('parametre.secteurs');
     Route::get('couvertures/new', 'ParametreController@newCouvertures')->name('parametre.couvertures');
+    Route::get('periodicites/new', 'ParametreController@newPeriodicites')->name('parametre.periodicites');
     Route::get('annonceurs/new', 'ParametreController@newAnnonceurs')->name('parametre.annonceurs');
     Route::post('annonceurs/store', 'ParametreController@storeAnnonceurs')->name('parametre.storeAnnonceurs');
     Route::get('dimension-internet/new', 'ParametreController@newDimensionInternet')->name('parametre.dimensionInternet');
@@ -27,4 +28,11 @@ Route::group(['namespace' => 'Administration','prefix' => 'parametre', 'middlewa
     Route::get('fusion-table-donnees/{tableID}', 'ParametreController@getDonneesFusion')->name('parametre.getDonneesFusion');
     Route::post('ajouter-id-fusion', 'ParametreController@ajouterIdFusion')->name('ajax.ajouterIdFusion');
     Route::post('traiter-form-fusion', 'ParametreController@traiterFormFusion')->name('ajax.traiterFormFusion');
+
+    Route::get('lieu-hors-media', 'ParametreController@lieuHorsMedia')->name('lieuHorsMedia');
+    Route::post('add-lieu-hors-media', 'ParametreController@addLieuHorsMedia')->name('addLieuHorsMedia');
+    Route::post('getLatLngLocalite', 'ParametreController@getLatLngLocalite')->name('ajax.getLatLngLocalite');
+
+    Route::post('delete-data', 'ParametreController@deleteData')->name('param.deleteData');
+    Route::post('supprimer-data', 'ParametreController@deleteRegister')->name('param.deleteRegister');
 });

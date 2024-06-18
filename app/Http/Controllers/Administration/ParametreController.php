@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Administration;
 
 use App\Helpers\DbTablesHelper;
 use App\Http\Controllers\core\FunctionController;
+use App\Http\Controllers\core\ModuleController;
+use App\Models\LieuLocalite;
+use App\Models\Localite;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -49,6 +52,11 @@ class ParametreController extends AdminController
 
     public function newCouvertures(){
         $table = DbTablesHelper::dbTable ('DBTBL_COUVERTURES','dbtables');
+        return $this->create ($table);
+    }
+
+    public function newPeriodicites(){
+        $table = DbTablesHelper::dbTable ('DBTBL_PERIODICITES','dbtables');
         return $this->create ($table);
     }
 
@@ -198,10 +206,10 @@ class ParametreController extends AdminController
             $ct = count($glob);
             if (count($glob) === 1):
                 $path = pathinfo($glob[0]);
-                $src = $dir.DIRECTORY_SEPARATOR."logo.".$path['extension'];
+                $src = array_key_exists('extension',$path) ? $dir.DIRECTORY_SEPARATOR."logo.".$path['extension'] : '';
             elseif ($ct === 2):
                 $path = pathinfo($glob[1]);
-                $src = $dir.DIRECTORY_SEPARATOR."logo.".$path['extension'];
+                $src = array_key_exists('extension',$path) ? $dir.DIRECTORY_SEPARATOR."logo.".$path['extension'] : '';
             else:
                 $src = '';
             endif;
@@ -537,4 +545,92 @@ class ParametreController extends AdminController
         endforeach;
         return $dpce;
     }
+
+    public function lieuHorsMedia()
+    {
+        $localites = Localite::where('parent',0)->orderBy('name')->get()->toArray();
+        $listeLieux = ModuleController::makeTable(DbTablesHelper::dbTable ('DBTBL_LIEU_LOCALITES','db'));
+        return view("administration.Parametres.formLieuHM",compact('localites','listeLieux'));
+    }
+
+    public function addLieuHorsMedia(Request $request)
+    {
+        $this->validate($request,[
+            'name' => 'required',
+            'localite' => 'required',
+            'latitude' => 'required',
+            'longitude' => 'required',
+
+        ],[
+            'name.required' => 'Le nom du lieu est obligatoire!',
+            'localite.required' => 'La localité est obligatoire!',
+            'latitude.required' => 'La latitude est obligatoire!',
+            'longitude.required' => 'La longitude est obligatoire!',
+        ]);
+
+        $lieuloc = new LieuLocalite();
+        $lieuloc->name = $request->input('name');
+        $lieuloc->localite = $request->input('localite');
+        $lieuloc->latitude = $request->input('latitude');
+        $lieuloc->longitude = $request->input('longitude');
+        $lieuloc->description = $request->input('description');
+        if ($lieuloc->save()):
+            $request->session()->flash('success','Lieu enregistré avec succès!');
+        else:
+            $request->session()->flash('echec','L\'enregistrement du lieu a échoué!');
+        endif;
+        return back();
+    }
+
+    public function getLatLngLocalite(Request $request)
+    {
+        $localiteID = $request->input('localite');
+        $res = [];
+        if ($localiteID !== null):
+            $res = Localite::find($localiteID)->toArray();
+        endif;
+        return [
+            'locID' => $localiteID,
+            'res' => $res
+        ];
+    }
+
+    public function deleteData(Request $request)
+    {
+        $table = $request->input('table');
+        $id = $request->input('id');
+        return [
+            'id' => $id,
+            'table' => $table
+        ];
+    }
+
+    public function deleteRegister(Request $request)
+    {
+        $table = $request->input('laTable');
+        $id = $request->input('laTableId');
+
+        $foreignKeys = transformResult2Array(tableForeignKey(env('DB_DATABASE'),$table));
+        $message = "";
+        $suprr = true;
+        foreach ($foreignKeys as $foreignKey):
+            $nbLigne = DB::select("SELECT count(*) as nb 
+                            FROM {$foreignKey['TABLE_NAME']}
+                             WHERE {$foreignKey['COLUMN_NAME']} = {$id}
+                        ");
+             if ($nbLigne[0]->nb):
+                $message .= "<b>{$nbLigne[0]->nb}</b> donnée(s) de <b>{$foreignKey['TABLE_NAME']}</b> à supprimer obligatoirement.<br>";
+                $suprr = false;
+             endif;
+        endforeach;
+        if ($suprr):
+            DB::select("DELETE FROM $table WHERE id = $id ");
+            Session::flash('success', 'Enrégistrement supprimé avec succès!');
+        else:
+            $message .= ' C\'est Après toutes ces instructions que cette données sera supprimer.';
+            Session::flash('info', $message);
+        endif;
+        return redirect()->back();
+    }
+
 }

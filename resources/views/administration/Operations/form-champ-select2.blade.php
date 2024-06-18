@@ -1,6 +1,11 @@
+
 <div class="chosen-select-single mg-b-20">
     <label for="{{ $champ }}"> {{ $libelle ?? ucfirst($champ) }}</label>
-    <select id="{{ $champ }}" class="chosen-select form-control" name="{{ $champ }}" tabindex="-1">
+    <select id="{{ $champ }}" class="chosen-select form-control" name="{{ $champ }}" tabindex="-1"
+    @if(isset($ajaxOnchange))
+        {!! $ajaxOnchange !!}
+    @endif
+    >
         <option value="">--Choisir--</option>
         @foreach($data as $r)
             @php($selected = $selectedValue == $r['id'] ? "selected='selected'" : "")

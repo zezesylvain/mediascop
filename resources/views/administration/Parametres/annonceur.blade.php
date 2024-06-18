@@ -51,7 +51,7 @@
                                         </label>
                                         <div class="file-button">
                                             Browse
-                                            <input type="file" name="logo" id="logo" onchange="document.getElementById('prepend-big-btn').value = this.value;" value="{{ $annonceur[0]['logo'] ?? old('logo') }}">
+                                            <input type="file" name="logo" id="logo" onchange="document.getElementById('prepend-big-btn').value = this.value;" value="{{ $annonceur[0]['logo'] ?? old('logo') }}" required>
                                         </div>
                                         <input type="text" id="prepend-big-btn" placeholder="no file selected">
                                     </div>

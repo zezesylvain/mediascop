@@ -9,7 +9,7 @@
                 <h3 class="timeline-title">Recherche</h3>
             </div>
             <div role="navigation">
-                @include("bbmap.selection.form2")
+                @include("bbmap.selection.form3")
                 <div class="timeline-heading">
                     <h3 class="timeline-title">Votre selection</h3>
                 </div>
@@ -36,6 +36,13 @@
                   @includeIf('bbmap.carto.carto2')
                 @endif
             </div>
+            <div>
+                <?php
+                //*?>
+                @include('bbmap.graphique')
+                <?php //*/
+                ?>
+            </div>
         </div>
         <div class="tab-pane fade" id="liste-pills">
             <div class="timeline-heading">
@@ -44,11 +51,11 @@
             <div class="" id="listeItem" role="navigation">
                 @if(isset($listeDesMap) && !empty($listeDesMap))
                     @includeIf("bbmap.panneaux.tableauDonnees")
-                @endisset
+                @endif
             </div>
         </div>
     </div> <!-- END .tab-content -->
     @if(isset($listeDesMap) && !empty($listeDesMap))
         {!! $map['js'] ?? ''!!}
-    @endisset
+    @endif
 @stop

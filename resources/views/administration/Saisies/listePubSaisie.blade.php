@@ -19,11 +19,15 @@
                         @foreach($medias as $r)
                                 <?php
                                 $thDuree = "";
+                                $thSupport = "<th width=''>Support</th>";
                                 $i++;
                                 $active = $r['id'] == $mediaActive ? "active" : "";
                                 $med = $r['name'] ;
                                 if ($med == "TELEVISION" || $med == "RADIO"):
                                     $thDuree = "<th>Dur&eacute;e</th>";
+                                endif;
+                                if ($med === "AFFICHAGE"):
+                                    $thSupport = "";
                                 endif;
                                 ?>
                                 <div id="TabSaisie{{$i}}" class="tab-pane in {{$active}} animated flipInX custon-tab-style1">
@@ -37,7 +41,7 @@
                                                     <th width=""></th>
                                                     <th width="">Date</th>
                                                     {!! $thDuree !!}
-                                                    <th width="">Support</th>
+                                                    {!! $thSupport !!}
                                                     <th>Titre de campagne</th>
                                                     @if($med === 'AFFICHAGE')
                                                         <th>Localité</th>
@@ -59,7 +63,9 @@
                                                         @if($med === "TELEVISION" || $med === "RADIO")
                                                             <td>{{$rr['heure']}}</td>
                                                         @endif
-                                                        <td>{{$getChampTable ($dbTable ('DBTBL_SUPPORTS','db'),$rr['support'])}}</td>
+                                                        @if($med !== 'AFFICHAGE')
+                                                            <td>{{$getChampTable ($dbTable ('DBTBL_SUPPORTS','db'),$rr['support'])}}</td>
+                                                        @endif
                                                         @php($campagneTitle = $getChampTable ($dbTable ('DBTBL_CAMPAGNES','db'),$rr['campagne'],'campagnetitle'))
                                                         <td>{!! $getChampTable ($dbTable ('DBTBL_CAMPAGNETITLES','db'),$campagneTitle,'title') !!}</td>
                                                         @if($med === 'AFFICHAGE')

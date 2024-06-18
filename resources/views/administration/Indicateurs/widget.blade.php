@@ -1,36 +1,32 @@
 {{--@php(dump ($indicateurs->mesIndicateurs()))--}}
-@if(count ($indicateurs->mesIndicateurs()))
-    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
-        <div class="panel panel-primary hpanel responsive-mg-b-30">
-            <div class="panel-body">
-                <table class="table table-responsive table-striped table-bordered">
-                        @if(in_array ('nbreMesNouvelleCampagneDuJour',$indicateurs->mesIndicateurs()))
-                            {!! $indicateurs->mesNouvelleCampagneDuJour(date ("Y-m-d")) !!}
-                        @endif
-                        @if(in_array ('nbreNouvelleCampagneDuJour',$indicateurs->mesIndicateurs()))
-                            {!! $indicateurs->lesNouvelleCampagneDuJour(date ("Y-m-d")) !!}
-                        @endif
-                        @if(in_array ('nbreMesCampagnesNonValidees',$indicateurs->mesIndicateurs()))
-                            {!! $indicateurs->nbreMesCampagnesNonValidees() !!}
-                        @endif
-                        @if(in_array ('nbreMesSaisiesNonValidees',$indicateurs->mesIndicateurs()))
-                            {!! $indicateurs->nbreMesSaisiesNonValidees(date ('Y-m-d')) !!}
-                        @endif
-                        @if(in_array ('nbreMesSaisiesValidees',$indicateurs->mesIndicateurs()))
-                            {!! $indicateurs->nbreMesSaisiesValidees(date ('Y-m-d')) !!}
-                        @endif
-                        @if(in_array ('nbreCampagnesNonValidees',$indicateurs->mesIndicateurs()))
-                            {!! $indicateurs->nbreCampagnesNonValidees() !!}
-                        @endif
-                        @if(in_array ('nbreSaisiesNonValidees',$indicateurs->mesIndicateurs()))
-                            {!! $indicateurs->nbreSaisiesNonValidees() !!}
-                        @endif
-                </table>
-            </div>
-        </div>
+@if($indicateurs->nbreIndication)
+    <div class="row">
+        @if(in_array ('nbreMesNouvelleCampagneDuJour',$indicateurs->mesIndicateurs()))
+            {!! $indicateurs->mesNouvelleCampagneDuJour(date ("Y-m-d")) !!}
+        @endif
+        @if(in_array ('nbreNouvelleCampagneDuJour',$indicateurs->mesIndicateurs()))
+            {!! $indicateurs->lesNouvelleCampagneDuJour(date ("Y-m-d")) !!}
+        @endif
+        @if(in_array ('nbreMesCampagnesNonValidees',$indicateurs->mesIndicateurs()))
+            {!! $indicateurs->nbreMesCampagnesNonValidees() !!}
+        @endif
+        @if(in_array ('nbreMesSaisiesNonValidees',$indicateurs->mesIndicateurs()))
+            {!! $indicateurs->nbreMesSaisiesNonValidees(date ('Y-m-d')) !!}
+        @endif
     </div>
-    <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12">
-        <div class="row">
+    <div class="row" style="margin-top: 100px!important;">
+        @if(in_array ('nbreMesSaisiesValidees',$indicateurs->mesIndicateurs()))
+            {!! $indicateurs->nbreMesSaisiesValidees(date ('Y-m-d')) !!}
+        @endif
+        @if(in_array ('nbreCampagnesNonValidees',$indicateurs->mesIndicateurs()))
+            {!! $indicateurs->nbreCampagnesNonValidees() !!}
+        @endif
+        @if(in_array ('nbreSaisiesNonValidees',$indicateurs->mesIndicateurs()))
+            {!! $indicateurs->nbreSaisiesNonValidees() !!}
+        @endif
+    </div>
+
+    <div class="row" style="margin-top: 10px!important;">
             @if(in_array ('tableauRecapDesNouvellesCampagnesDuJour',$indicateurs->mesIndicateurs()))
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <div class="panel panel-primary hpanel responsive-mg-b-30">
@@ -80,7 +76,6 @@
                 </div>
             @endif
         </div>
-    </div>
 
     @if(in_array ('nbreMesSaisiesDuJour',$indicateurs->mesIndicateurs()))
 

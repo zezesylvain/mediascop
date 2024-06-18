@@ -16,16 +16,9 @@
                         </select>
                     </div>
                 </div>
-                
-                {!! $lestables !!}
-{{--
-                @if(!empty($tableauDeDonnees))
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <hr class="trait-bleu">
-                        {!! $tableauDeDonnees !!}
-                    </div>
-                @endif
---}}
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    {!! $lestables !!}
+                </div>
             </div>
         </div>
     </div>

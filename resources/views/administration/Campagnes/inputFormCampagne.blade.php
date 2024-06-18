@@ -23,28 +23,9 @@
         </div>
     
         <div class="col-xs-6 col-sm-3 col-lg-2 form-group-inner">
-            <label for="nature"> Nature </label>
-            <select class="chosen-select form-control" name="nature" id="nature">
-                <option value="">Choisir une nature</option>
-            </select>
-        </div>
-    
-        <div class="col-xs-6 col-sm-3 col-lg-2 form-group-inner">
             <label for="cible"> Cible </label>
             <select class="chosen-select form-control" name="cible" id="cible">
                 <option value="">Choisir une cible</option>
-            </select>
-        </div>
-        <div class="col-xs-6 col-sm-3 col-lg-2 form-group-inner">
-            <label for="type_promo"> Type de Promo </label>
-            <select class="chosen-select form-control" name="type_promo" id="type_promo">
-                <option value="">Choisir un type de promo</option>
-            </select>
-        </div>
-        <div class="col-xs-6 col-sm-3 col-lg-2 form-group-inner">
-            <label for="type_service"> Type de Service </label>
-            <select class="chosen-select form-control" name="type_service" id="type_service">
-                <option value="">Choisir un type de service</option>
             </select>
         </div>
         <div class="col-xs-6 col-sm-3 col-lg-2 form-group-inner" id="box_internet_dimension" style="display: none">
@@ -79,7 +60,7 @@
 
 <script>
     function inputFormCampagne(mediaID,campTitleID) {
-        var url = "{{route ('ajax.formInputCampagne')}}";
+        const url = "{{route ('ajax.formInputCampagne')}}";
         $.ajax({
             type : "POST",
             url : url ,
@@ -91,10 +72,8 @@
         
             success : function(data){
                 remplirChampSelect('format',data.formats,'name','Choisir un format');
-                remplirChampSelect('nature',data.natures,'name','Choisir une nature');
                 remplirChampSelect('cible',data.cibles,'name','Choisir une cible');
-                remplirChampSelect('type_promo',data.typePromos,'name','Choisir un type de Promo');
-                remplirChampSelect('type_service',data.typeServices,'name','Choisir un type de Service');
+
                 if (data.autreChpSelect){
                     if (data.media === 3){
                        $('#box_presse_calibre').css('display','block');
@@ -109,7 +88,7 @@
                         $('#box_presse_couleur').css('display','none');
                         $('#presse_couleur').attr('name','');
                     }
-                    if (data.media == 4){
+                    if (data.media === 4){
                         $('#box_internet_dimension').css('display','block');
                         $('#internet_dimension').attr('name','internet_dimension');
                         remplirChampSelect('internet_dimension',data.listeDesDimensions,'name','Choisir une dimension');
@@ -117,7 +96,7 @@
                         $('#box_internet_dimension').css('display','none');
                         $('#internet_dimension').attr('name','');
                     }
-                    if (data.media == 6){
+                    if (data.media === 6){
                         $('#box_affichage_dimension').css('display','block');
                         $('#affichage_dimension').attr('name','affichage_dimension');
                         remplirChampSelect('affichage_dimension',data.affichageDimensions,'name','Choisir une dimension');

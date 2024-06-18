@@ -1,49 +1,46 @@
 <!doctype html>
-<html class="no-js" lang="en">
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet"> 
+<html class="no-js" lang="fr">
 @include("layouts.administration._head")
-<style>
-    @media (max-width: 767px) {
-        .all-content-wrapper {
-        margin-left: 0px;
-    }
-       .header-top-area{
-           position: relative;
-           left: 0px;
-       }
-        .logo-pro {
-            display: block;
-            text-align: center;
-            background: #fff;
-            font-family: 'Montserrat', sans-serif;
-        }
-    }
-    .sidebar-nav .metismenu ul a {
-    padding: 1px 15px 1px 30px;
-        padding-right: 15px;
-}
-</style>
 <?php
-$latDefault =  isset($localite['latitude']) ? $localite['latitude'] : 5.356149786699246;
-$lngDefault = isset($localite['longitude']) ? $localite['longitude'] :-4.007166835937483;
+    //if (isset($map)):
+        $latDefault =  isset($localite['latitude']) ? $localite['latitude'] : 5.356149786699246;
+        $lngDefault = isset($localite['longitude']) ? $localite['longitude'] :-4.007166835937483;
+    //endif;
 ?>
-<body onload="initialize('{{$latDefault}}','{{$lngDefault}}')">
-<script src="{{asset ("softs/jscolor/jscolor.js")}}"></script>
+<body
+        {{--@if(isset($map))--}}
+            onload="initialize('{{$latDefault}}','{{$lngDefault}}')"
+        {{--@endif--}}
+>
+<script src="{{asset ("softs/jscolor/jscolor.js")}}" defer></script>
     <!--[if lt IE 8]>
     <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
     <![endif]-->
 
     <div class="left-sidebar-pro">
-        @include("layouts.administration._header")
+       <!-- @ include("layouts.administration._header")--->
+       
+       <nav id="sidebar" class="">
+            <div class="sidebar-header">
+                <a href=""><img class="main-logo" src="{{asset("template/img/logo/logo.png")}}" alt="" /></a>
+                <strong><img src="{{asset("template/img/logo/logo-mediascop.png")}}" alt="" /></strong>
+            </div>
+            <div class="left-custom-menu-adp-wrap comment-scrollbar">
+                <nav class="sidebar-nav left-sidebar-menu-pro">
+                    <!--@ include("layouts.administration._menu")-->
+                    @php($lesMenus = \App\Http\Controllers\HomeController::menuTable())
+                    @include('layouts/menu', compact('lesMenus'))
+                </nav>
+            </div>
+        </nav>
+       
     </div>
     <div class="all-content-wrapper">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <div class="logo-pro">
-                        <a href="{{route ('home')}}"><img class="main-logo" src="{{asset("template/img/logo/logo
-                        .png")}}" alt="" style="height: 60px!important;width: 250px!important;"/></a>
+                        <a href="{{route ('home')}}"><img class="main-logo" src="{{asset("template/img/logo/logo.png")}}" alt="" style="height: 60px!important;width: 250px!important;"/></a>
                     </div>
                 </div>
             </div>

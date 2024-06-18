@@ -36,7 +36,7 @@
                                                     {{$rowvalue['operationname']}} ({{$rowvalue['id']}})
                                                 </td>
                                                 <td>
-                                                    <a href="{{route ('saisie.creerCampagne',[$rowvalue['id']])}}" title="Supprimer opération!"><i class="fa fa-trash"></i> </a>
+                                                    <a href="{{route ('saisie.creerCampagne',[$rowvalue['id']])}}" title="Créer Campagne!"><i class="fa fa-pencil"></i> </a>
                                                 </td>
                                             </tr>
                                         @endforeach

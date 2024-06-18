@@ -20,7 +20,12 @@ Route::group(['namespace' => 'Administration','prefix' => 'dashbord', 'middlewar
     Route::post('detail-medias', 'TableauDeBordController@detailMedias')->name('ajax.getMediaDetail');
     Route::post('form-valider-titre-campagne', 'CampagnesController@validerCampTitleForm')->name('dashbord.validerCampTitleForm');
     Route::get('save-table-export', 'TableauDeBordController@saveTableExport')->name('dashbord.saveTableExport');
-    Route::get('export', 'TableauDeBordController@export')->name('dashbord.export');
+
+    //Route::get('export', 'TableauDeBordController@export')->name('dashbord.export');
+    Route::get('export', 'TableauDeBordController@newExport')->name('dashbord.export');
+    Route::post('export-data', 'TableauDeBordController@exportData')->name('dashbord.exportData');
+    Route::post('filtre-donnees', 'TableauDeBordController@filtreDonnees')->name('ajax.filtreDonnees');
+
     Route::get('export-table/{tableID}', 'TableauDeBordController@exportTable')->name('dashbord.exportTable');
     Route::post('ajouter-table-export', 'TableauDeBordController@ajouterTableExport')->name('ajax.ajouterTableExport');
     Route::post('form-export-query', 'TableauDeBordController@formExportQuery')->name('dashbord.formExportQuery');
@@ -28,4 +33,7 @@ Route::group(['namespace' => 'Administration','prefix' => 'dashbord', 'middlewar
     Route::post('get-donnees-table', 'TableauDeBordController@getDonneesDeTable')->name('ajax.getDonneesDeTable');
     Route::post('get-donnees-pubs', 'TableauDeBordController@getDonneesPubs')->name('ajax.getDonneesPubs');
     Route::get('get-csv-pubs', 'TableauDeBordController@getCsvPubs')->name('dashbord.getCSV');
+
+    Route::get('liste-saisie-valider/{saisie}', 'TableauDeBordController@listeSaisieValider')->name('ajax.listeSaisieValider');
+
 });

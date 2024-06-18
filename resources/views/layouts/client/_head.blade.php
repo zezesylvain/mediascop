@@ -5,7 +5,7 @@
     <meta name="description" content="">
     <meta name="author" content="VZ">
     
-    <title>{{config('app.name','Mediascop')}}</title>
+    <title>{{ env('APP_NAME_REPORTING', 'Repporting') }}</title>
     
     <meta name="_token" content="{!! csrf_token() !!}"/>
     
@@ -26,8 +26,10 @@
     <!-- Custom CSS -->
     <link href="{{asset("client/index_fichiers/dashboard.css")}}" rel="stylesheet">
     <link href="{{asset("client/index_fichiers/style.css")}}" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{asset ("css/flatpickr.min.css")}}">
+
     <script type="text/javascript" src="{{asset("client/index_fichiers/jquery-1.js")}}"></script>
-    <!--    <link href="templates/generic/assets/css/stylezds.css" rel="stylesheet">-->
     <script src="{{asset("client/index_fichiers/jquery.js")}}"></script>
     <link href="{{asset("client/index_fichiers/dataTables.css")}}" rel="stylesheet">
     
@@ -127,4 +129,5 @@
     
 
     <link rel="stylesheet" href="{{asset("css/vz.css")}}?d={{date('YmdHis')}}">
+    <link rel="stylesheet" href="{{asset("css/style-perso.css")}}?d={{date('YmdHis')}}">
 </head>

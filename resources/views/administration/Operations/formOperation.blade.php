@@ -25,7 +25,8 @@
                             <div class="col-sm-6 form-group{{ $errors->has('annonceur') ? ' has-error' : '' }}">
                                @include('administration.Operations.form-champ-select2', [
                                     'champ' => 'annonceur',  'data' => $annonceurs, 
-                                    'selectedValue' => $operation[0]['annonceur'] ?? 0
+                                    'selectedValue' => $operation[0]['annonceur'] ?? 0,
+                                    'ajaxOnchange' => 'onchange="getTypeService(this.value)"'
                                 ])
                             </div>
                             
@@ -35,21 +36,13 @@
                                     'selectedValue' => $operation[0]['couverture'] ?? 0
                                 ])
                             </div>
-                            <div class="col-sm-6 col-md-3 form-group{{ $errors->has('typeservice_id') ? ' has-error' : '' }}">
+                            <div class="col-sm-6 col-md-3 form-group{{ $errors->has('type_service') ? ' has-error' : '' }}">
                                 @include('administration.Operations.form-champ-select2', [
-                                    'champ' => 'typeservice_id', 'libelle' => 'Type de service',
-                                    'data' => $typeservices, 'selectedValue' => $operation[0]['typeservice_id'] ?? 0
-                                ])
-                                </div>
-                            </div>
-                            <div class="col-sm-6 col-md-3 form-group{{ $errors->has('couverture') ? ' has-error' : '' }}">
-                                @include('administration.Operations.form-champ-select2', [
-                                    'champ' => 'typecom_id', 'libelle' => 'Type de comm',
-                                    'data' => $typecoms, 
-                                    'selectedValue' => $operation[0]['typecom_id'] ?? 0
+                                    'champ' => 'type_service', 'libelle' => 'Type de service',
+                                    'data' => $typeservices, 'selectedValue' => $operation[0]['type_service'] ?? 0
                                 ])
                             </div>
-                            
+
                             <div class="col-sm-6 col-md-3 form-group{{ $errors->has('adddate') ? ' has-error' : '' }}">
                                 <label for="adddate">Date ajout</label>
                                 <input id="adddate" placeholder="" type="text" class="form-control avantDate" name="adddate" value="{{ $operation[0]['adddate'] ?? $dateajout }}"  autofocus>
@@ -71,4 +64,25 @@
             </div>
         </div>
     </div>
+
+    <script type="text/javascript">
+        function getTypeService(annonceurID) {
+            $.ajax({
+                type : "POST",
+                url : '{{ route('ajax.getTypeService') }}' ,
+                dataType: 'JSON',
+                data : {
+                    annonceurID : annonceurID,
+                },
+
+                success : function(data){
+                    $('#type_service').empty().append("<option value=''>Choisir un type de service</option>");
+                    $.map( data.typeServices, function( item) {
+                        $('#type_service').append("<option value="+item.id+">"+item.name+ "</option>");
+                    });
+                    $('#type_service').trigger("chosen:updated");
+                }
+            });
+        }
+    </script>
 @endsection

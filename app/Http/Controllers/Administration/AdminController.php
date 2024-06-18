@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Administration;
 use App\Helpers\DbTablesHelper;
 use App\Http\Controllers\core\CoreController;
 use App\Http\Controllers\core\FunctionController;
+use App\Models\Localite;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -119,7 +120,7 @@ class AdminController extends CoreController
 
     public static function createInputPubs($media){
         $defaultvalue = [
-            'internet_emplacement' => 1, 'presse_page' => 0, 'affichage_panneau' => 1, 'investissement' => 0, 'nombre' =>  0, 'profil_mobile' => 1, 'support' => 1, 'coeff' => 1, 'tarif' => 1, 'duree' => 0,'heure' => ''
+            'internet_emplacement' => 1, 'presse_page' => 0, 'affichage_panneau' => 1, 'investissement' => 0, 'nombre' =>  0, 'profil_mobile' => 1, 'support' => 1, 'coeff' => 1, 'tarif' => 0, 'duree' => 0,'heure' => ''
         ];
         switch ($media) {
             case '1':
@@ -174,13 +175,19 @@ class AdminController extends CoreController
     public static function createInputMobile(int $media):string {
         $heure = date('H:i:s');
         $route = route('ajax.addInputMedia');
-        $support = self::createInputSupport($media,array("onchange" => "sendData('operateur='+this.value+'&action=mobile_profil', '$route ', 'mobileprofilitem')"));
+        //$support = self::createInputSupport($media,array("onchange" => "sendData('operateur='+this.value+'&action=mobile_profil', '$route ', 'mobileprofilitem')"));
+        $support = self::createInputSupport($media,array("onchange" => "getMobileProfil(this.value)"));
         $inputPubs =  self::createinputtarif().self::createInputPubs($media);
         return view ("administration.Form.inputMobile", compact ('heure','support','inputPubs'))->render ();
 
     }
 
     public static function createInputHorsMedia(int $media, int $campagneID):string {
+        $localites = Localite::orderBy('name','asc')->get()->toArray();
+        $inputPubs = self::createInputPubs ($media);
+        return view ("administration.Form.inputHorsMedias",compact('media','localites','inputPubs','campagneID'))->render();
+    }
+    public static function createInputHorsMediaOld(int $media, int $campagneID):string {
         if (Session::has ('pointsHorsMedia')):
             Session::forget ('pointsHorsMedia');
         endif;
@@ -202,6 +209,7 @@ class AdminController extends CoreController
         $formats = FunctionController::arraySqlResult ("SELECT * FROM ".DbTablesHelper::dbTable ('DBTBL_FORMATS','db')." WHERE media = $media ORDER BY name ASC");
         $latDefault = 5.3096600;
         $lngDefault = -4.0126600;
+        //dd($media,$supports,$formats);
         return view ("administration.Form.inputHorsMedias", compact ('heure','supports','secteurID','typeDeService','typeDePromos','latDefault','lngDefault','formats','formatID'))->render ();
     }
 
@@ -464,5 +472,6 @@ class AdminController extends CoreController
     {
 
     }
+
 
 }

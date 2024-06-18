@@ -16,20 +16,40 @@
         </a>
     </li>
     <li>
+        <a class="btn btn-default btn-xs" href="#planmedia-pills" data-toggle="tab">
+            <i class="fa fa-television"></i> Plan M&eacute;dia (Annonceurs)
+        </a>
+    </li>
+    <li>
         <a class="btn btn-default btn-xs" href="#list-pills" data-toggle="tab">
             <i class="fa fa-list"></i> Plan M&eacute;dia (Campagnes)
         </a>
     </li>
     <li>
-        <a class="btn btn-default btn-xs" href="#planmedia-pills" data-toggle="tab">
-            <i class="fa fa-television"></i> Plan M&eacute;dia (Annonceurs)
+        -
+    </li>
+    <li class="">
+        <a class="btn btn-default btn-xs" href="#speednews-pills" data-toggle="tab">
+            <i class="fa fa-columns"></i> Alerte M&eacute;dia
         </a>
     </li>
+    <li class="">
+        <a class="btn btn-default btn-xs" href="#rapport-pills" data-toggle="tab">
+            <i class="fa fa-file-pdf-o"></i> Archives Rapports 
+        </a>
+    </li>
+    <!---- >
     <li class="pull-right">
         <a class="btn btn-default btn-xs" href="#rapport-pills" data-toggle="tab">
             <i class="fa fa-file-pdf-o"></i> Rapports (&agrave; t&eacute;l&eacute;charger)
         </a>
     </li>
+    <li class="pull-right">
+        <a class="btn btn-default btn-xs" href="#speednews-pills" data-toggle="tab">
+            <i class="fa fa-columns"></i> Alerte M&eacute;dia
+        </a>
+    </li>
+    <!---->
     <li class="pull-right">
         <a class="btn btn-default btn-xs" href="#speednews-pills" data-toggle="tab">
             <i class="fa fa-columns"></i> Alerte M&eacute;dia

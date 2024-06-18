@@ -2,22 +2,29 @@
     <div class="container-fluid">
         <!-- Hamburger Menu and Brand (Logo) -->
         <div class="navbar-header">
-            <a class="navbar-brand pull-right navbar-toggle collapsed" href="#"><i class="fa fa-info-circle"></i></a>
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="#"><img src="{{asset("Mediascop/images/woodycms.png")}}" alt="WoodyCMS" class="img-responsive"></a>
+            <div class="row row-offcanvas row-offcanvas-left">
+                <div class="col-xs-12 cadre">
+                    <a class="navbar-brand pull-right navbar-toggle collapsed" href="#"><i class="fa fa-info-circle"></i></a>
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#"><img src="{{asset("medias/billboardmap.png")}}" alt="BillboardMap" class="img-responsive"></a>
+                </div>
+            </div>
+                    
         </div>
-        <!-- Global Navigation -->
-        <ul class="nav navbar-nav">
-            @include("layouts.billboardmap._menu")
-        </ul>
         <div class="navbar-collapse collapse">
             <div class="nav navbar-nav navbar-right">
-                <a class="navbar-brand" href="#"><img src="{{asset("Mediascop/images/woodycms.png")}}" alt="WoodyCMS" class="img-responsive"></a>
+                <a class="navbar-brand pull-right hidden-xs logo-orange" href="#">
+                    <img src="https://nsc.nsconsulting.ci/nsc/images/logo.jpg" alt="NS Cnsulting" class="img-responsive">
+                </a>
+                <!-- Global Navigation -->
+                <ul class="nav navbar-nav  navbar-right">
+                    @include("layouts.billboardmap._menu")
+                </ul>
             </div>
         </div>
     </div>

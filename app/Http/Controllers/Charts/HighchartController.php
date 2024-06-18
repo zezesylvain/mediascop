@@ -14,7 +14,7 @@ class HighchartController extends Controller
             $chartData = "" ;
             $virg = "" ;
             $data = [] ;
-            //dd($donnees) ;
+            //dd($donnees, $titre) ;
             foreach ($donnees as $k => $v):
                 $sum = is_array($v) ? array_sum($v) : $v ;
                 $ab = addslashes($k) ;

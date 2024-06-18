@@ -834,6 +834,7 @@ STR;
     }
 
     public static function nbrows($table, $cond = '') {
+        //$cond = DB::connection()->getPdo()->quote($cond);
         $sql = DB::select(DB::raw(
             "SELECT COUNT(*) as nbRow FROM  ".$table."  $cond "
         ));
@@ -1113,4 +1114,29 @@ STR;
         return $uri;
     }
 
+    public static function getDatesFromRange(string $startDate, string $endDate) {
+        $return = array($startDate);
+        $start = $startDate;
+        $i = 1;
+        if (strtotime($startDate) < strtotime($endDate)) {
+            while (strtotime($start) < strtotime($endDate)) {
+                $start = date('Y-m-d', strtotime($startDate . '+' . $i . ' days'));
+                $return[] = $start;
+                $i++;
+            }
+        }
+
+        return $return;
+    }
+
+    public static  function random_1($car) {
+        $string = "";
+        //$chaine = "abcdefghijklmnpqrstuvwxy";
+        $chaine = "1234567890abcdefghijklmnpqrstuvwxy";
+        srand((double)microtime()*1000000);
+        for($i=0; $i<$car; $i++) {
+            $string .= $chaine[rand()%strlen($chaine)];
+        }
+        return $string;
+    }
 }

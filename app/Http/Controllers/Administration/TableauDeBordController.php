@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Administration;
 
+use App\Exports\FicheMediaExport;
 use App\Exports\PubsExports;
 use App\Helpers\DbTablesHelper;
 use App\Http\Controllers\core\FunctionController;
@@ -9,6 +10,14 @@ use App\Http\Controllers\core\ModuleController;
 use App\Http\Controllers\core\XeditableController;
 use App\Jobs\SendEmailJob;
 use App\Mail\Speednews;
+use App\Models\Annonceur;
+use App\Models\Cible;
+use App\Models\Couverture;
+use App\Models\Format;
+use App\Models\Media;
+use App\Models\Nature;
+use App\Models\Secteur;
+use App\Models\Support;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -22,6 +31,94 @@ class TableauDeBordController extends AdminController
 
     protected $condition;
 
+    public $genericQuery = "
+        SELECT
+                %s
+        FROM
+                zdsb_pubs p,
+                zdsb_campagnetitles ct,
+                zdsb_campagnes c,
+                zdsb_supports sup,
+                zdsb_formats f,
+                zdsb_cibles ci,
+                zdsb_medias m,
+                zdsb_couvertures co,
+                zdsb_annonceurs so,
+                zdsb_operations o,
+                zdsb_affichage_dimensions di,
+                zdsb_internet_dimensions dim,
+                zdsb_presse_calibres  ca,
+                zdsb_presse_couleurs coul,
+                zdsb_vz_users u,
+                zdsb_secteurs se
+        WHERE
+                p.campagne = c.id AND
+                p.support = sup.id AND
+                p.user = u.id AND
+                c.campagnetitle = ct.id AND
+                c.format = f.id AND
+                c.cible = ci.id AND
+                c.affichage_dimension = di.id AND
+                c.presse_couleur = coul.id AND
+                c.internet_dimension = dim.id AND
+                c.presse_calibre = ca.id AND
+                sup.media = m.id AND
+                ct.operation = o.id AND
+                o.annonceur = so.id AND
+                so.secteur = se.id AND
+                o.couverture = co.id 
+                %s AND
+                p.date BETWEEN '%s' AND '%s'
+        ORDER BY p.date DESC";
+
+    public $exportSelect = "
+                p.date,
+                m.name AS media,
+                sup.name AS support,
+                f.name AS format,
+                ci.name AS cible,
+                se.name AS secteur,
+                so.raisonsociale AS annonceur,
+                ct.title AS title,
+                o.name AS operation,
+                c.duree, 
+                (p.tarif + p.investissement) AS tarif, 
+                p.coeff,
+                p.heure,
+                u.name AS utilisateur,
+                co.name AS couverture,
+                coul.name AS couleur,
+                ca.name AS calibre,
+                dim.name AS dimension,
+                di.name AS dimension_du_panneaux,
+                c.mobilemessage AS message_sms
+                ";
+    public $sqllistpub = "
+                p.id, p.date, p.tarif, p.coeff,
+                ct.title as campagnetitle,
+                sup.name as supportname,
+                so.raisonsociale
+                ";
+
+    public $entete = array(
+        'date' => 'DATE', 'heure' => 'HEURE', 'couverturename' => 'COUVERTURE',
+        'naturename' => 'NATURE',
+        'formatname' => 'FORMAT',
+        'ciblename' => 'CIBLE', 'supportname' => 'SUPPORT',
+        'raisonsociale' => 'ANNONCEUR', 'campagnetitle' => 'CAMPAGNE',
+        'operationtitle' => 'OPERATION', 'secteurname' => 'SECTEUR',
+        'offretelecom' => 'OFRE TELECOM',
+        'tarif' => 'TARIF', 'coef' => 'COEF',
+        'duree' => 'DUREE', 'couleurname' => 'COULEUR',
+        'calibrename' => 'CALIBRE', 'dimension' => 'DIMENSION (Internet)',
+        'dimensiondupaneau' => 'DIM PANNEAU', 'messagesms' => 'CONTENU SMS',
+        'medianame' => 'MEDIA',
+        'username' => 'USER',
+        'tranche_horaire' => 'TRANCHE HORAIRE'
+    );
+
+
+    public $data;
 
     public function listeCampagnes(){
         $action = "campagnes";
@@ -140,19 +237,27 @@ class TableauDeBordController extends AdminController
         return $cond;
     }
 
-    public static function makeListeDesCampagnes(int $valide = 1){
+    public static function makeListeDesCampagnes(int $valide = 1,$ajax = null){
         $cond = self::getCondition ();
         $DATABASE = $valide == 0  ? DbTablesHelper::dbTable ("DBTBL_CAMPAGNETITLE_NON_VALIDES",'db') : DbTablesHelper::dbTable ("DBTBL_CAMPAGNETITLES",'db');
         $condValide = $valide == 0 ? " AND ct.valide = $valide " : "";
-        $sql = "SELECT ct.id, ct.title, ct.adddate, o.name as operationname, a.raisonsociale
+        $condLoad = "";
+        $view = 'tablistecampagnes';
+        if ($ajax === true):
+            $view = 'tablistecampagnesLoad';
+            $condLoad = " AND ct.created_at LIKE '%".date('Y-m-d')."%' ";
+        endif;
+
+        $sql = "SELECT ct.id, ct.title, ct.adddate, ct.adddate, o.name as operationname, a.raisonsociale
                 FROM
                      ".DbTablesHelper::dbTable('DBTBL_OPERATIONS','db') ." o,
                      ".DbTablesHelper::dbTable('DBTBL_ANNONCEURS','db') ." a,
                       {$DATABASE} ct
-                WHERE ct.operation = o.id AND o.annonceur = a.id $cond $condValide ORDER BY ct.adddate DESC ";
+                WHERE ct.operation = o.id AND o.annonceur = a.id $cond $condValide $condLoad ORDER BY ct.adddate DESC,ct.id DESC ";
+        //dump($sql);
         $tabdata = FunctionController::arraySqlResult($sql);
         $routeval = route ('ajax.validerPubs');
-        return view ("administration.TableauDeBords.tablistecampagnes", compact ('tabdata','valide','DATABASE','routeval'))->render ();
+        return view ("administration.TableauDeBords.$view", compact ('tabdata','valide','DATABASE','routeval'))->render ();
     }
 
     public static function filterCampagne(Request $request){
@@ -183,7 +288,8 @@ class TableauDeBordController extends AdminController
         endif;
     }
 
-    public static function listerData(string $action, int $valide = 1){
+    public static function listerData(string $action, int $valide = 1)
+    {
         if (Session::has ("filter_param.action") && $action != Session::get("filter_param.action")):
             Session::forget ("filter_param");
             Session::forget ("PubsValide");
@@ -235,9 +341,11 @@ class TableauDeBordController extends AdminController
         endif;
     }
 
-    public static function makeListeDesOperations(int $valider = 1){
+    public static function makeListeDesOperations(int $valider = 1, $ajax = null)
+    {
         $cond = $valider == 1 ? self::getCondition () : "";
         $view = $valider == 1 ? "listeOperations" : "listeOperationsValider";
+
         $sql = "SELECT
                         o.id, o.adddate, o.name as operationname, a.id as societeid, a.raisonsociale, s.name as secteurname
                         FROM
@@ -245,8 +353,8 @@ class TableauDeBordController extends AdminController
                              ".DbTablesHelper::dbTable('DBTBL_ANNONCEURS','db')." a,
                              ".DbTablesHelper::dbTable('DBTBL_SECTEURS','db'). " s
                         WHERE
-                            o.annonceur = a.id  AND a.secteur = s.id AND o.valider = $valider $cond
-                        ORDER BY o.adddate DESC ";
+                            o.annonceur = a.id  AND a.secteur = s.id AND o.valider = $valider $cond ORDER BY o.adddate DESC ";
+
         $dataTableData = FunctionController::arraySqlResult($sql);
         $databaseTable = DbTablesHelper::dbTable ('DBTBL_OPERATIONS','db');
         return view ("administration.TableauDeBords.$view",compact ('dataTableData','databaseTable'))->render ();
@@ -260,37 +368,59 @@ class TableauDeBordController extends AdminController
 
         $champs = $action == "HORS-MEDIAJJ" ? " p.type_service, p.type_promo, " : "";
         $champErr = $valide == 0 ? " ,p.erreur " : "";
-        $sqlpub = "SELECT p.id, p.date,p.support,$champs p.campagne, p.tarif, p.coeff, p.investissement, p.user $champErr
+        $champsAffichage = $action === "AFFICHAGE" ? " ,p.date_fin_affichage" : "";
+        $sqlpub = "SELECT p.id, p.date,p.support,$champs p.campagne, p.tarif, p.coeff, p.investissement, p.heure, p.internet_emplacement, p.presse_page, p.user {$champErr} {$champsAffichage}
                 FROM
                 ".DbTablesHelper::dbTable($tablePubs,'db')." p,
                 ".DbTablesHelper::dbTable('DBTBL_SUPPORTS','db')." s
                 WHERE  p.support = s.id
                     AND s.media = {$mediaID} $cond";
         $listpub = FunctionController::arraySqlResult($sqlpub);
+        //dump($listpub);
         if (count ($listpub)):
             $thDuree = "";
             $thHorsMedia = "";
+            $thOperation = "";
+            $thHeure = "";
+            $thEmplacement = "";
+            $thAffichage = "";
             if ($action == "TELEVISION" || $action == "RADIO"):
                 $thDuree = $valide == 0 ? "<th data-field=\"duree\" data-editable=\"true\" data-editable-type=\"text\">Dur&eacute;e</th>" : "<th>Dur&eacute;e</th>";
+                $thOperation = "<th>Opération</th>";
+                $thHeure = $valide == 0 ? "<th data-field=\"heure\" data-editable=\"true\" data-editable-type=\"text\">Heure</th>" : "<th>Heure</th>";
             endif;
             if ($action == "HORS-MEDIA"):
                 $thHorsMedia .= $valide == 0 ? "<th data-field=\"type_service\" data-editable=\"true\" data-editable-type=\"text\">Type de service</th>" : "<th>Type de service</th>";
                 $thHorsMedia .= $valide == 0 ? "<th data-field=\"type_promo\" data-editable=\"true\" data-editable-type=\"text\">Type de promo</th>" : "<th>Type de promo</th>";
             endif;
+            if ($action === "INTERNET" || $action === "PRESSE"):
+                $thEmplacement = "<th>Emplacement</th>";
+            endif;
+            if ($action === "AFFICHAGE"):
+                $editable = $valide === 0 ? "data-field=\"date_fin_affichage\" data-editable=\"true\"
+                                                    data-editable-type=\"date\"
+                                                    data-editable-viewformat=\"dd/mm/yyyy\"
+                                                    data-editable-format=\"yyyy-mm-dd\" " : "";
+                $editableInvest = $valide === 0 ? "data-field='investissement' data-editable='true' data-editable-type='text'" : "";
+                $thAffichage = "<th {$editable}>Date Fin</th><th {$editableInvest}>Invest.</th>";
+            endif;
+
             $tBody = self::tablePubContent ($listpub,$action,$valide);
             $databaseTable = $valide == 0 ? DbTablesHelper::dbTable ('DBTBL_PUB_NON_VALIDES','db') : DbTablesHelper::dbTable ('DBTBL_PUBS','db');
             $lesSupports = FunctionController::arraySqlResult ("SELECT id, name FROM ".DbTablesHelper::dbTable ('DBTBL_SUPPORTS','db')." WHERE media = {$mediaID}");
             $source = XeditableController::makeJsonFile ($lesSupports);
-            return view ("administration.TableauDeBords.tabListePubs",compact ('listpub','action','thDuree','thHorsMedia','tBody','databaseTable','source','valide'))->render ();
+            return view ("administration.TableauDeBords.tabListePubs",compact ('listpub','action','thDuree','thHorsMedia','tBody','databaseTable','source','valide','thHeure','thOperation','thEmplacement','thAffichage'))->render ();
         endif;
     }
 
-    public static function tablePubContent(array $listePubs, string $action,int $valide = 1):string {
+    public static function tablePubContent(array $listePubs, string $action,int $valide = 1):string 
+    {
         $tBody = "";
         $ij=0;
-        $tableCampTitle = $valide == 1 ? 'DBTBL_CAMPAGNETITLES' : 'DBTBL_CAMPAGNETITLE_NON_VALIDES';
+       // $tableCampTitle = $valide == 1 ? 'DBTBL_CAMPAGNETITLES' : 'DBTBL_CAMPAGNETITLE_NON_VALIDES';
+        $tableCampTitle = 'DBTBL_CAMPAGNETITLES';
         $DATABASE =  DbTablesHelper::dbTable('DBTBL_PUBS','db');
-
+        //dd($listePubs);
         foreach ($listePubs as $row) :
             $rowID = $row['id'];
             $supportID = $row['support'];
@@ -299,6 +429,7 @@ class TableauDeBordController extends AdminController
             $campagnetitle = FunctionController::getChampTable (DbTablesHelper::dbTable ($tableCampTitle,'db'),$campagnetitleID,'title');
             $rowvalide = $valide;
             $number = $row['tarif'] + $row['investissement'];
+           // dump($row);
             $investTarif = FunctionController::formatNumber($number,0,",",".");
             $rowcoeff = $row['coeff'] ;
             $rowtarif = $investTarif;
@@ -309,26 +440,38 @@ class TableauDeBordController extends AdminController
             $routeval = route('ajax.validerPubs');
             $tdDuree = "";
             $tdHorsMedia = "";
-            if ($action == "TELEVISION" || $action == "RADIO"):
+            $tdOperation = "";
+            $tdHeure = "";
+            $tdEmplacement = "";
+            $tdAffichage = "";
+            if ($action === "TELEVISION" || $action === "RADIO"):
                 $getduree = FunctionController::getChampTable(DbTablesHelper::dbTable('DBTBL_CAMPAGNES','db'),$row['campagne'],"duree");
                 $rowduree = $getduree;
                 $tdDuree = "<td>".$rowduree."</td>";
+                $operationID = FunctionController::getChampTable(DbTablesHelper::dbTable('DBTBL_CAMPAGNETITLES','db'),$campagnetitleID,'operation');
+                $operation = FunctionController::getChampTable(DbTablesHelper::dbTable('DBTBL_OPERATIONS','db'),$operationID,'name');
+                $tdOperation = "<td>".$operation."</td>";
+                $tdHeure = "<td>".$row['heure']."</td>";
             endif;
-            if ($action == "HORS-MEDIAJJ"):
-                $getTypeService = FunctionController::getChampTable(DbTablesHelper::dbTable('DBTBL_TYPE_DE_SERVICES','db'),$row['type_service']);
-                $getTypePromo = FunctionController::getChampTable(DbTablesHelper::dbTable('DBTBL_TYPE_DE_PROMOS','db'),$row['type_promo']);
-                $tdHorsMedia .= "<td>".$getTypeService."</td>";
-                $tdHorsMedia .= "<td>".$getTypePromo."</td>";
+            if ($action === "PRESSE" || $action === "INTERNET"):
+                $champ = $action === "PRESSE" ? 'presse_page' : 'internet_emplacement';
+                $tbEmpl = $action === "PRESSE" ? DbTablesHelper::dbTable('DBTBL_PRESSE_PAGES','db') : DbTablesHelper::dbTable('DBTBL_INTERNET_EMPLACEMENTS','db');
+                $donneeEmplacement = FunctionController::getChampTable($tbEmpl,$row[$champ],'name');
+                $tdEmplacement = "<td>".$donneeEmplacement."</td>";
             endif;
-            if ($rowvalide == 0):
+            if ($action === "AFFICHAGE"):
+                $dateTaff = $valide === 1 ? FunctionController::date2Fr($row['date_fin_affichage']) : $row['date_fin_affichage'];
+                $tdAffichage .= "<td>{$dateTaff}</td><td>{$row['investissement']}</td>";
+            endif;
+            if ($rowvalide === 0):
                  $ij++;
             endif;
             $checkErr = "";
             if (isset($row['erreur'])):
-               $checkErr = $row['erreur'] == 1 ? "checked" : "";
+               $checkErr = $row['erreur'] === 1 ? "checked" : "";
             endif;
-            $tdErreur = $valide == 0 ? "<td><input id=\"erreur\" type=\"checkbox\" name=\"erreur\" value=\"\" onclick='signalerErreur({$row["id"]},this.checked)' {$checkErr}></td>" : "";
-            $tBody .= view ("administration.TableauDeBords.tBodyPubs",compact ('rowsupport','rowdate','rowvalide','rowtarif','rowcoeff','DATABASE','active','campagnetitle','tdDuree','tdHorsMedia','rowvalide','rowID','ij','routeval','supportID','action','userSaisie','tdErreur'))->render ();
+            $tdErreur = $valide === 0 ? "<td><input id=\"erreur\" type=\"checkbox\" name=\"erreur\" value=\"\" onclick='signalerErreur({$row["id"]},this.checked,$ij)' {$checkErr}></td>" : "";
+            $tBody .= view ("administration.TableauDeBords.tBodyPubs",compact ('rowsupport','rowdate','rowvalide','rowtarif','rowcoeff','DATABASE','active','campagnetitle','tdDuree','tdHorsMedia','rowvalide','rowID','ij','routeval','supportID','action','userSaisie','tdErreur','tdOperation','tdHeure','tdEmplacement','checkErr','tdAffichage'))->render ();
         endforeach;
         return $tBody;
     }
@@ -345,51 +488,94 @@ class TableauDeBordController extends AdminController
         return redirect ()->route ("dashbord.campagnes");
     }
 
-    public function validerPubs(Request $request): string
+    public function validerPubs(Request $request)
     {
+        $action = '';
         $table = FunctionController::getTableNameSansPrefixe ($request->input('database'));
         $id = $request->input('id');
         $tableP = DbTablesHelper::dbTablePrefixeOff('DBTBL_PUB_NON_VALIDES','db');
-        $champs = 'date, campagne, support, affichage_panneau, dateajout,tarif,coeff,user,heure,presse_page,internet_emplacement,mobile,investissement,nombre,localite';
+        $champs = 'date, campagne, support, affichage_panneau, dateajout,tarif,coeff,user,heure,presse_page,internet_emplacement,mobile,investissement,nombre,localite,point_id,date_fin_affichage,affichage_uniq_id';
         if (array_key_exists ('k',$request->all ())):
             $champs = 'operation, offretelecom, title, adddate, user';
             $tableP = DbTablesHelper::dbTablePrefixeOff('DBTBL_CAMPAGNETITLE_NON_VALIDES','db');
             $table = DbTablesHelper::dbTablePrefixeOff('DBTBL_CAMPAGNETITLES','db');
+            $action = 'campagnes';
         endif;
         $query = "SELECT %s FROM %s WHERE id = %d";
         DB::transaction (function () use($id,$table,$tableP,$champs,$query,$request){
             $tablePP = FunctionController::getTableName ($tableP);
             $dinvalid = FunctionController::arraySqlResult (sprintf ($query,$champs,$tablePP,$id));
             $data = $dinvalid[0];
-            $insID = DB::table ($table)->insertGetId ($data);
+            $data['heure'] = $data['heure'] === null ? date('H:i') : $data['heure'];
+            $media = FunctionController::getChampTable(DbTablesHelper::dbTable('DBTBL_SUPPORTS','db'),$data['support'],'media');
+            if ($media === 6):
+                $lesDates = FunctionController::getDatesFromRange($data['date'],$data['date_fin_affichage']);
+                $invest = ceil($data['investissement']/count($lesDates));
+                $data['investissement_affichage'] = $data['investissement'];
+                $data['investissement'] = $invest;
+                $insID = DB::transaction(function ()use ($lesDates,$data){
+                    foreach ($lesDates as $laDate):
+                        $data['date'] = $laDate;
+                        DB::table(DbTablesHelper::dbTablePrefixeOff ('DBTBL_PUBS','db'))->insert($data);
+                    endforeach;
+                    return true;
+                });
+            else:
+                $insID = DB::table ($table)->insertGetId ($data);
+            endif;
             DB::table ($tableP)->where('id', $id)->delete ();
             if (!array_key_exists ('k',$request->all ())):
                 self::speedNews ($insID);
             endif;
         });
-        return view ("administration.TableauDeBords.checkedPubs")->render ();
+        if (!array_key_exists ('k',$request->all ())):
+            return view ("administration.TableauDeBords.checkedPubs")->render ();
+        else:
+            return [
+                'db' => $request->input('database'),
+                'routeListeData' => route('ajax.listeSaisieValider',[$action]),
+                'resAction' => 'saisieValiderItem',
+                'valideBox' => view ("administration.TableauDeBords.checkedPubs")->render (),
+            ];
+        endif;
     }
 
     public function FormvaliderPubs(Request $request): \Illuminate\Http\RedirectResponse
     {
         $listPubs = $request->input('listpub');
-        $query = "SELECT date,campagne,support,affichage_panneau,dateajout,tarif,coeff,user,heure,presse_page,internet_emplacement,mobile,investissement,nombre,localite
-                        FROM
-                        ".DbTablesHelper::dbTable ('DBTBL_PUB_NON_VALIDES','db')."
-                        WHERE id = %d";
+        $query = "SELECT date,campagne,support,affichage_panneau,dateajout,tarif,coeff,user,heure,presse_page,internet_emplacement,mobile,investissement,nombre,localite,point_id,date_fin_affichage,affichage_uniq_id
+                FROM
+                ".DbTablesHelper::dbTable ('DBTBL_PUB_NON_VALIDES','db')."
+                WHERE id = %d";
         if (!empty($listPubs)):
             DB::transaction (function () use($listPubs,$query){
                 foreach ($listPubs as $pub):
                     $pubNonValider = FunctionController::arraySqlResult (sprintf ($query,$pub));
                     $data = $pubNonValider[0];
-                    //dd($data);
-                    $pubID = DB::table (DbTablesHelper::dbTablePrefixeOff ('DBTBL_PUBS','db'))
-                        ->insertGetId ($data);
+                    $data['heure'] = $data['heure'] === null ? date('H:i') : $data['heure'];
+                    $media = FunctionController::getChampTable(DbTablesHelper::dbTable('DBTBL_SUPPORTS','db'),$data['support'],'media');
+                    if ($media === 6):
+                        $lesDates = FunctionController::getDatesFromRange($data['date'],$data['date_fin_affichage']);
+                        $invest = ceil($data['investissement']/count($lesDates));
+                        $data['investissement_affichage'] = $data['investissement'];
+                        $data['investissement'] = intval($invest);
+                        $pubID = DB::transaction(function ()use ($lesDates,$data){
+                            foreach ($lesDates as $laDate):
+                                $data['date'] = $laDate;
+                                DB::table(DbTablesHelper::dbTablePrefixeOff ('DBTBL_PUBS','db'))->insert($data);
+                            endforeach;
+                            return true;
+                        });
+                    else:
+                        $pubID = DB::table (DbTablesHelper::dbTablePrefixeOff ('DBTBL_PUBS','db'))
+                            ->insertGetId ($data);
+                    endif;
+
                     DB::table (DbTablesHelper::dbTablePrefixeOff ('DBTBL_PUB_NON_VALIDES','db'))
                         ->where('id', $pub)
                         ->delete ();
 
-                    //self::speedNews($pubID);
+                    self::speedNews($pubID);
                 endforeach;
             });
             Session::flash("success", "Pubs validée(s) avec succès!");
@@ -440,6 +626,7 @@ class TableauDeBordController extends AdminController
     }
 
     public function export(){
+        //Session::forget('exportTable');
        $listeTables = FunctionController::arraySqlResult ("SELECT * FROM ".DbTablesHelper::dbTable ('DBTBL_TABLE_EXPORTS','db')." ORDER BY name ASC");
         $tableauDeDonnees = [];
         $filtreTable = "";
@@ -521,7 +708,8 @@ class TableauDeBordController extends AdminController
                 $tdata['media'] = $mediaID;
                 $tdata['dateajout'] = $pubs[0]['date'];
                 if($pubs[0]['heure'] == null):
-                    $tdata['heure'] = "00:00";
+                    //$tdata['heure'] = "00:00";
+                    $tdata['heure'] = date('H:i');
                 else:
                     $tdata['heure'] = $pubs[0]['heure'];
                 endif;
@@ -802,5 +990,243 @@ class TableauDeBordController extends AdminController
             endforeach;
          endif;
      }
+
+     public function listeSaisieValider(string $saisie)
+     {
+         $valider = 1;
+         if ($saisie === 'campagnes'):
+             return self::makeListeDesCampagnes($valider,true);
+         endif;
+     }
+
+     public function newExport()
+     {
+         $secteurs = Secteur::all()->toArray();
+         $formats = Format::all()->toArray();
+         $annonceurs = Annonceur::all()->toArray();
+         $medias = Media::all()->toArray();
+         $natures = Nature::all()->toArray();
+         $cibles = Cible::all()->toArray();
+         $couvertures = Couverture::all()->toArray();
+         $supports = Support::all()->toArray();
+
+         $date_debut = date('Y-m-d');
+         $date_fin = date('Y-m-d');
+         $condition = "";
+         $sqlpubbis = sprintf($this->genericQuery, $this->sqllistpub, $condition, $date_debut, $date_fin);
+         $listpub = FunctionController::arraySqlResult($sqlpubbis);
+         $nbt = count($listpub);
+         //dd($sqlpubbis,$listpub);
+         $export = true;
+         $html = "";
+         return view('administration.reportings.formexport', compact('date_debut','date_fin','secteurs','formats','medias','natures','cibles','couvertures','supports','annonceurs','listpub','nbt','export','html'));
+
+     }
+
+    public function filtreDonnees(Request $request)
+    {
+        $laTable = $request->input('laTable');
+        $iditem = $request->input('iditem');
+        $id = $request->input('id');
+        $laCible = $request->input('cible');
+        $optvalue = "";
+        $datas = [];
+        if ($laCible === 'annonceur' && $laTable === 'secteur'):
+            $datas = Annonceur::where('secteur',$id)->get()->toArray();
+            $optvalue = 'Choisir un annonceur';
+        endif;
+        if ($laCible === 'support' && $laTable === 'media'):
+            $datas = Support::where('media',$id)->get()->toArray();
+            $optvalue = 'Choisir un support';
+        endif;
+        if ($laCible === 'format' && $laTable === 'media'):
+            $datas = Format::where('media',$id)->get()->toArray();
+            $optvalue = 'Choisir un format';
+        endif;
+        //dump($request->all(),$datas);
+        return [
+            'result' => $datas,
+            'optvalue' => $optvalue,
+            'cible' => $iditem
+        ];
+    }
+
+    public function exportData(Request $request)
+    {
+        //dd($request->all());
+        $html= "";
+        $export = false;
+        $this->data = $request->all();
+        if (!empty($this->data)) :
+            $date_debut = $this->data['date_debut'];
+            $date_fin = $this->data['date_fin'];
+            $and = " AND ";
+            $conditionAnnonceur = "";
+            if (array_key_exists('secteur', $this->data) && !empty($this->data['secteur'])):
+                $conditionAnnonceur = "$and
+                             so.secteur =  " . $this->data['secteur'];
+            endif;
+            if (array_key_exists('annonceur', $this->data) && !empty($this->data['annonceur'])):
+                $conditionAnnonceur = "$and
+                                     so.id =  " . $this->data['annonceur'];
+            endif;
+            $condition = "";
+            $condition .= $conditionAnnonceur;
+
+            if (array_key_exists('media', $this->data) && !empty($this->data['media'])):
+                if (array_key_exists('support', $this->data) && !empty($this->data['support'])):
+                    $condition .="$and
+                             sup.id =  " . $this->data['support'];
+                else:
+                    $condition .="$and
+                             sup.media =  " . $this->data['media'];
+                endif;
+                if (array_key_exists('format', $this->data) && !empty($this->data['format'])):
+                    $condition .= "$and
+                             f.id =  " . $this->data['format'];
+                endif;
+            endif;
+            if (array_key_exists('nature', $this->data) && !empty($this->data['nature'])):
+                $condition .= "$and
+                             n.id =  " . $this->data['nature'];
+            endif;
+            if (array_key_exists('couverture', $this->data) && !empty($this->data['couverture'])):
+                $condition .= "$and
+                             co.id =  " . $this->data['couverture'];
+            endif;
+            if (array_key_exists('cible', $this->data) && !empty($this->data['cible'])):
+                $condition .= "$and
+                             ci.id =  " . $this->data['cible'];
+            endif;
+            if (array_key_exists('listpub', $this->data) || array_key_exists('checkall', $this->data)):
+                if (array_key_exists('listpub', $this->data)):
+                    $datafield = $this->data['listpub'];
+                    $INid = '(' . join(',', $datafield) . ')';
+                    $condition .= "$and
+                             p.id IN $INid ";
+                endif;
+                $exportQuery = sprintf($this->genericQuery, $this->exportSelect, $condition, $date_debut, $date_fin);
+                $entete = $this->entete;
+                $ress = FunctionController::arraySqlResult($exportQuery);
+                $nbl = count($ress);
+                $file = "export-" . date('Y-m-d_hsi') . ".xlsx";
+
+                $path = "upload".DIRECTORY_SEPARATOR."export";
+                Excel::store(new FicheMediaExport($ress),$path.DIRECTORY_SEPARATOR.$file);
+
+               /* if (!is_dir($path)):
+                    mkdir($path);
+                endif;
+                $fichier = public_path($path.DIRECTORY_SEPARATOR.$file);
+                $fp = fopen($fichier, 'w+');
+                $in = 0;
+                fputcsv($fp, $entete, ';');
+                foreach ($ress as $fields) :
+                    if($fields['heure'] == ""):
+                        $fields['tranche_horaire'] = "";
+                    else:
+                        if($fields['media'] == 'TELEVISION' ||$fields['media'] == 'RADIO'):
+                            $t = explode(':',$fields['heure']);
+                            $t2 = intval($t[0]) == 23 ? "00" : intval($t[0])+1;
+                            $trh = $t[0]."h - ".$t2."h";
+                        else:
+                            $trh = "";
+                        endif;
+                        $fields['tranche_horaire'] = $trh;
+                    endif;
+                    $nbpart = intval($in % 10);
+                    fputcsv($fp, $fields, ';');
+                    $in++;
+                endforeach;
+                fclose($fp) ;*/
+
+                $html = "
+            <h3>Nombre de lignes export&eacute;es: $nbl <br>
+                <a href=\"".route("reporting.getCSV", $file)."\">Cliquez ici pour t&eacute;l&eacute;charger le fichier</a>
+            </h3>";
+                $export = true;
+            endif;
+            $sqlpubbis = sprintf($this->genericQuery, $this->sqllistpub, $condition, $date_debut, $date_fin);
+            $listpub = FunctionController::arraySqlResult($sqlpubbis);
+            $nbt = count($listpub);
+
+            $secteurs = Secteur::all()->toArray();
+            $formats = Format::all()->toArray();
+            $annonceurs = Annonceur::all()->toArray();
+            $medias = Media::all()->toArray();
+            $natures = Nature::all()->toArray();
+            $cibles = Cible::all()->toArray();
+            $couvertures = Couverture::all()->toArray();
+            $supports = Support::all()->toArray();
+
+            return view('administration.reportings.formexport', compact('export','date_debut','date_fin','secteurs','formats','annonceurs','medias','natures','cibles','couvertures','supports','html','nbt','listpub'));
+        endif;
+    }
+
+    public function getCSV($file){
+        //return response()->download(public_path("upload/export/$file"));
+        return response()->download(storage_path("app/upload/export/$file"));
+    }
+
+    public function getFile($file,$chemin)
+    {
+        $chemins = str_replace("-",DIRECTORY_SEPARATOR,"$chemin");
+        return response()->download(public_path($chemins."/".$file));
+    }
+
+    public function exportDataFichierMedia($data)
+        {
+        $date_debut = $data['date_debut'];
+        $date_fin = $data['date_fin'];
+        $and = " AND ";
+        $conditionAnnonceur = "";
+        if (array_key_exists('secteur', $data) && !empty($data['secteur'])):
+            $conditionAnnonceur = "$and
+                         so.secteur =  " . $data['secteur'];
+        endif;
+        if (array_key_exists('annonceur', $data) && !empty($data['annonceur'])):
+            $conditionAnnonceur = "$and
+                                 so.id =  " . $data['annonceur'];
+        endif;
+        $condition = "";
+        $condition .= $conditionAnnonceur;
+
+        if (array_key_exists('media', $data) && !empty($data['media'])):
+            if (array_key_exists('support', $data) && !empty($data['support'])):
+                $condition .="$and
+                         sup.id =  " . $data['support'];
+            else:
+                $condition .="$and
+                         sup.media =  " . $data['media'];
+            endif;
+            if (array_key_exists('format', $data) && !empty($data['format'])):
+                $condition .= "$and
+                         f.id =  " . $data['format'];
+            endif;
+        endif;
+        if (array_key_exists('nature', $data) && !empty($data['nature'])):
+            $condition .= "$and
+                         n.id =  " . $data['nature'];
+        endif;
+        if (array_key_exists('couverture', $data) && !empty($data['couverture'])):
+            $condition .= "$and
+                         co.id =  " . $data['couverture'];
+        endif;
+        if (array_key_exists('cible', $data) && !empty($data['cible'])):
+            $condition .= "$and
+                         ci.id =  " . $data['cible'];
+        endif;
+        if (array_key_exists('listpub', $data) || array_key_exists('checkall', $data)):
+            if (array_key_exists('listpub', $data)):
+                $datafield = $data['listpub'];
+                $INid = '(' . join(',', $datafield) . ')';
+                $condition .= "$and
+                         p.id IN $INid ";
+            endif;
+        endif;
+        $exportQuery = sprintf($this->genericQuery, $this->exportSelect, $condition, $date_debut, $date_fin);
+        return FunctionController::arraySqlResult($exportQuery);
+    }
+
 
 }

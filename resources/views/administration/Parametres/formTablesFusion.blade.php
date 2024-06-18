@@ -6,7 +6,7 @@
             <div class="col-sm-12">
                 <div id="messageExport" class="alert "></div>
             </div>
-            <form method="POST" >
+            <form method="POST" class="col-sm-12" style="max-height: 500px;overflow: auto;">
                 @foreach($tables as $r)
                     @php($checked = in_array ($r,$tablesFusions) ? "checked" : "")
                     <div class="col-sm-3 form-group">

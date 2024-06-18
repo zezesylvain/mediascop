@@ -1,23 +1,29 @@
-<div class="col-sm-12">
-    <hr class="trait-bleu">
-</div>
-<div class="col-sm-12">
-    <div id="messageFusion" class="alert "></div>
-</div>
-<form method="POST" >
-    @foreach($tables as $r)
-        @if($r != $libelleTableFusion)
-            @php($checked = in_array ($r,$listeTablesDependants) ? "checked" : "")
-            <div class="col-sm-3 form-group">
-                <div class="form-group bt-df-checkbox pull-left" id="">
-                    <label for="table-{{$r}}" class="">
-                        <input type="checkbox" class="pull-left radio-checked" value="{{$r}}" name="table" onclick="choisirTableFusionDependance('{{$tableFusionID}}',this.value,this.checked)" id="table-{{$r}}" {{$checked}}>
-                        {{$r}}
-                    </label>
+<div id="messageFusion" class="alert "></div>
+<form method="POST" class="col-sm-12">
+    <div class="row" style="max-height: 400px!important;overflow: auto;">
+{{--
+        <div class="col-sm-12">
+            <div class="row">
+                <div class="col-sm-3">
+                    <input type="text" class="form-control" placeholder="Rechercher une table">
                 </div>
             </div>
-        @endif
-    @endforeach
+        </div>
+--}}
+        @foreach($tables as $r)
+            @if($r != $libelleTableFusion)
+                @php($checked = in_array ($r,$listeTablesDependants) ? "checked" : "")
+                <div class="col-sm-3 form-group">
+                    <div class="form-group bt-df-checkbox pull-left" id="">
+                        <label for="table-{{$r}}" class="">
+                            <input type="checkbox" class="pull-left radio-checked" value="{{$r}}" name="table" onclick="choisirTableFusionDependance('{{$tableFusionID}}',this.value,this.checked)" id="table-{{$r}}" {{$checked}}>
+                            {{$r}}
+                        </label>
+                    </div>
+                </div>
+            @endif
+        @endforeach
+    </div>
 </form>
 <script>
     function choisirTableFusionDependance(table, tableDependant, etat) {

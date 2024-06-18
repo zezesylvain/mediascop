@@ -54,7 +54,7 @@
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <a href="">
+                                                    <a href="{{ route('reporting.deleteRapport',[$rapport['id']]) }}">
                                                         <i class="fa fa-trash-o rouge"></i>
                                                     </a>
                                                 </td>
@@ -64,9 +64,7 @@
                                                     $ex = $extfile[count($extfile) - 1];
                                                     $icone = $icon($ex)
                                                     ?>
-                                                    <a target='_blank' href='{{route('reporting.getFile',
-                                                    [$rapport['file'], 'upload-rapports'])}}' title='Télécharger
-                                                    {{$rapport['title']}}'>
+                                                    <a target='_blank' href='{{route('reporting.getFile',[encrypt($rapport['file'])])}}' title='Télécharger {{$rapport['title']}}'>
                                                         <i class="fa fa-file" {{$icone}}></i>
                                                     </a>
                                                 </td>

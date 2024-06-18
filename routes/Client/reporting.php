@@ -25,4 +25,6 @@ Route::group(['namespace' => 'Client','prefix' => 'reporting', 'middleware' => [
     Route ::get ( 'lister-speednews', 'AdminController@listerSpeednews' )->name ( 'listerSpeednews');
     Route ::post ( 'filterCampagneSecteur', 'AdminController@filterCampagneSecteur' )->name ( 'filterCampagneSecteur');
     Route ::get ( 'listeSpeednews', 'AdminController@listeSpeednews' )->name ( 'ajax.listeSpeednews');
+
+    Route ::get ( 'download-visuels/{fichier}', 'AdminController@downloadVisuel' )->name ( 'reporting.downloadVisuel');
 });

@@ -49,7 +49,7 @@
                     <tbody>
                         @foreach($lesSpeednews AS $sp)
                             <tr>
-                                <td> {{ $sp['date'] }} </td>
+                                <td> {{ $date2Fr($sp['date']) }} </td>
                                 <td>
                                     <a href="{{ route('reporting.detailCampagne', ['cid' => $sp['campagnetitle_id']]) }}" target="_blank">
                                         {!! $sp['campagne'] !!}
@@ -58,7 +58,9 @@
                                 <td>{{ $sp['media'] }}</td>
                                 <td>{{ $sp['annonceur'] }}</td>
                                 <td> {{ $sp['support'] }} </td>
-                                <td></td>
+                                <td style="vertical-align: middle;text-align: center;">
+                                    {!! \App\Http\Controllers\Client\AdminController::illustrationDoc($sp['campagnetitle_id'],$sp['fichier']) !!}
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>

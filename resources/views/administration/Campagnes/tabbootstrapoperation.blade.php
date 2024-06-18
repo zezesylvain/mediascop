@@ -41,7 +41,10 @@
                                                 {!! $rowvalue['operationname'] !!}
                                             </td>
                                             <td>
+                                                <input type="radio" name="operation" value="{{$rowvalue['id']}}" id="operation[{{$rowvalue['id']}}]" onChange="getFormSaisieCampTitle('{{$rowvalue['id']}}','{{$rowvalue['secteurID']}}','{{$rowvalue['annonceurID']}}')" required>
+{{--
                                                 <input type="radio" name="operation" value="{{$rowvalue['id']}}" id="operation[{{$rowvalue['id']}}]" onChange="sendData('opid={{$rowvalue['id']}}&secteurID={{$rowvalue['secteurID']}}&annonceurID={{$rowvalue['annonceurID']}}', '{{route ('ajax.campagne')}}', 'opitem')" required>
+--}}
                                             </td>
                                         </tr>
                                         @endforeach

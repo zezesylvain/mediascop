@@ -17,7 +17,7 @@ class Operation extends Model
         return $this->belongsTo('App\Models\Typecom');
     }
     public function typeservice(){
-        return $this->belongsTo('App\Models\Typeservice');
+        return $this->belongsTo('App\Models\TypeService');
     }
     public function campagnetitles(){
         return $this->hasMany('App\Models\Campagnetitle', 'operation');

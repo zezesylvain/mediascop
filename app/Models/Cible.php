@@ -10,6 +10,9 @@ class Cible extends Model
     public function pubs(){
         return $this->hasMany('App\Models\Pub', 'cible');
     }
+    public function campagnes(){
+        return $this->hasMany('App\Models\Campagne', 'cible');
+    }
     public function reportings(){
         return $this->hasMany('App\Models\Reporting', 'cible');
     }

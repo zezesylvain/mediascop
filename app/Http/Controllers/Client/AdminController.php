@@ -8,7 +8,9 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
@@ -384,7 +386,6 @@ class AdminController extends Controller
         $tDoCampagne = DbTablesHelper::dbTable('DBTBL_DOCAMPAGNES','db');
         $sql = "SELECT * FROM $tDoCampagne WHERE campagnetitle = $cid AND media = $media";
         $res = FunctionController::arraySqlResult($sql);
-        //dump($res,count($res) === 1);
         $uri = 'upload'.DIRECTORY_SEPARATOR.'campagnes';
         if(count($res)) :
             $type = $res[0]['type'] ;
@@ -423,5 +424,39 @@ class AdminController extends Controller
         endif ;
         return $return ;
     }
-    
+
+
+    public static function illustrationDoc(int $cid, string $fichier):string
+    {
+        $lefichier = "upload".DIRECTORY_SEPARATOR."campagnes".DIRECTORY_SEPARATOR.$cid.DIRECTORY_SEPARATOR.$fichier;
+        $leCheminFichier = public_path(str_replace('\\','/',$lefichier));
+        $ret = "";
+        if (file_exists($leCheminFichier)):
+            $tabImageExt = FunctionController::getTabExtension('imageext');
+            $tabVideoExt = FunctionController::getTabExtension('videoext');
+            $tabAudioExt = FunctionController::getTabExtension('audioext');
+            $pathinfo = pathinfo($lefichier);
+            if (array_key_exists('extension',$pathinfo)):
+                $urldounload = route("reporting.downloadVisuel", [encrypt($lefichier)]);
+                $ret .= "<a href='".$urldounload."' title='Clicker pour Télécharger'>";
+                $type = $pathinfo['extension'];
+                if(in_array($type,$tabImageExt,true)):
+                    $ret .= '<img style="width: 90%; " class="img-responsive" src="'.asset(str_replace('\\','/',$lefichier)).'">' ;
+                elseif(array_key_exists($type,  $tabVideoExt)):
+                    $ret .= "<i class='fa fa-film fa-3x'></i>" ;
+                elseif(array_key_exists($type, $tabAudioExt)):
+                    $ret .= "<i class='fa fa-microphone fa-3x'></i>" ;
+                endif ;
+                $ret .= "</a>";
+
+            endif;
+        endif;
+        return $ret;
+    }
+
+    public static function downloadVisuel(string $file)
+    {
+        $fichier = decrypt($file);
+        return Response::download(public_path($fichier));
+    }
 }

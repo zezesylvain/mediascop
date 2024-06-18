@@ -35,6 +35,8 @@ Route::get('/welcome', function (){
     return view ("welcome");
 });
 
+
+
 Route::get('/', 'HomeController@index');
 Route::get('/home', 'HomeController@index')->name('home');
 
@@ -46,6 +48,8 @@ include_once("Administration/valider.php");
 include_once("Administration/indicateur.php");
 include_once("Messagerie/messagerie.php");
 include_once("Client/reporting.php");
+
+include_once("Event/eventmap.php");
 
 /**
  * Ajout BillBord Gninatin
@@ -68,18 +72,19 @@ Route::group(['namespace' => 'Client','prefix' => 'report', 'middleware' => ['au
     Route ::post ('detail', 'ReportController@detailSpeednews') -> name ( 'client.detail');
     Route ::get ('detail-campagne/{cid}', 'ClientFunctionController@detailCampagne') -> name ('reporting.detailCampagne');
 
-    Route ::get ( 'chercher-detail/{cid}', 'ReportController@getDetail' ) -> name ( 'client.getDetail');
-    Route ::post ( 'chercher-donnees-medias', 'ReportController@chercherDonneesMediaSupport' ) -> name ( 'ajax.chercherDonneesMediaSupport');
-    Route ::post ( 'get-reportform-datas', 'ReportController@getReportFormDatas' )->name ( 'ajax.getReportFormDatas');
-    Route ::get ( 'gestion-des-abonnements', 'AdminController@gestionDesAbonnements' )->name ( 'gestionDesAbonnements');
-    Route ::post ( 'forms-abonnements', 'AdminController@chercherFormAbonnement' )->name ( 'ajax.chercherFormAbonnement');
-    Route ::post ( 'abonnement-secteur', 'AdminController@abonnementSecteur' )->name ( 'ajax.abonnementSecteur');
-    Route ::post ( 'abonnement-societe', 'AdminController@abonnementSociete' )->name ( 'ajax.abonnementSociete');
-    Route ::get ( 'lister-speednews', 'AdminController@listerSpeednews' )->name ( 'listerSpeednews');
-    Route ::post ( 'filterCampagneSecteur', 'AdminController@filterCampagneSecteur' )->name ( 'filterCampagneSecteur');
-    Route ::get ( 'listeSpeednews', 'AdminController@listeSpeednews' )->name ( 'ajax.listeSpeednews');
+    Route::get ( 'chercher-detail/{cid}', 'ReportController@getDetail' ) -> name ( 'client.getDetail');
+    Route::post ( 'chercher-donnees-medias', 'ReportController@chercherDonneesMediaSupport' ) -> name ( 'ajax.chercherDonneesMediaSupport');
+    Route::post ( 'get-reportform-datas', 'ReportController@getReportFormDatas' )->name ( 'ajax.getReportFormDatas');
+    Route::get ( 'gestion-des-abonnements', 'AdminController@gestionDesAbonnements' )->name ( 'gestionDesAbonnements');
+    Route::post ( 'forms-abonnements', 'AdminController@chercherFormAbonnement' )->name ( 'ajax.chercherFormAbonnement');
+    Route::post ( 'abonnement-secteur', 'AdminController@abonnementSecteur' )->name ( 'ajax.abonnementSecteur');
+    Route::post ( 'abonnement-societe', 'AdminController@abonnementSociete' )->name ( 'ajax.abonnementSociete');
+    Route::get ( 'lister-speednews', 'AdminController@listerSpeednews' )->name ( 'listerSpeednews');
+    Route::post ( 'filterCampagneSecteur', 'AdminController@filterCampagneSecteur' )->name ( 'filterCampagneSecteur');
+    Route::get ( 'listeSpeednews', 'AdminController@listeSpeednews' )->name ( 'ajax.listeSpeednews');
 });
 //*/
+
 Route::get('/geomap', function(){
     $config = array();
     $config['center'] = 'auto';
@@ -90,7 +95,6 @@ Route::get('/geomap', function(){
             });
         }
         centreGot = true;';
-
     app('map')->initialize($config);
 
     // set up the marker ready for positioning
@@ -105,4 +109,5 @@ Route::get('/geomap', function(){
 Route::get('/maps/{map}', 'core\GoogleMapsController@index')->name('maps.index');
 Route::get('/frontend/{map}', 'core\GoogleMapsController@index')->name('frontend.maps.show');
 Route::get('/updateOperation', 'Administration\CampagnesController@updateOperation')->name('updateOperationZDS');
+Route::get('/sendSpeednewsMail', 'Administration\SpeednewsController@sendEmail');
 

@@ -8,3 +8,6 @@
         </div>
     </div>
 @endsection
+@section("breadcome-area")
+    @includeIf("layouts.administration._breadcome_area")
+@endsection

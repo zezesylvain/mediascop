@@ -1,4 +1,5 @@
-<div id="supportitem" class="col-xs-6 col-sm-4 col-md-3 col-lg-2 form-group-inner">
+
+<div id="supportitem" class="col-xs-6 col-sm-6 col-md-6 col-lg-6 form-group-inner">
     @php
         $support = session ()->has ("supportPubIn")  ? session ()->get ("supportPubIn") : 0;
     @endphp

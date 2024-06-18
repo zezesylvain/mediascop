@@ -25,6 +25,7 @@
                 <div class="panel-body">
                     <div id="mediasRapportsItem">
                         {!! $rapp->makeFormVisuelRapport() !!}
+                        {{--{!! $rapp->makeListeRapportsCharges() !!}--}}
                     </div>
                 </div>
             </div>
@@ -91,13 +92,15 @@
 
     <script>
         $(document).ready(function () {
-            $('.formRapport').submit(function (event) {
+            $('.uploadForm').click(function (event) {
                 event.preventDefault();
                 var url = "{{route('rapport.validerRapport')}}";
+                var form = $(this).closest('form')
                 $.ajax({
                     url: url,
                     method: 'POST',
                     data: new FormData(this),
+                    //data: form.serialize(),
                     dataType: "JSON",
                     contentType: false,
                     cache: false,
@@ -111,6 +114,9 @@
                         setTimeout(function () {
                             $('#messageRapportValider').css('display', 'none');
                         },4000);
+                    },
+                    error:function (err) {
+                        console.log(err);
                     }
                 });
             });
@@ -118,4 +124,9 @@
 
     </script>
 
+    <script>
+        function getFormValiderRapport() {
+            
+        }
+    </script>
 @endsection

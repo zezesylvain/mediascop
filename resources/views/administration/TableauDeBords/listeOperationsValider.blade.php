@@ -84,7 +84,7 @@
                data: {
                    opID: opID
                },
-        
+
                success: function (result) {
                    $('#messageItem').addClass(result.alert).text(result.message)
                    if (result.ok){

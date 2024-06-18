@@ -3,6 +3,11 @@
 namespace App\Http\Controllers\core;
 
 use App\Helpers\DbTablesHelper;
+use App\Models\GroupeMenu;
+use App\Models\Menu;
+use App\Models\Profil;
+use App\Models\ProfilRole;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -301,46 +306,39 @@ class TmaController extends Controller
         return back();
     }
 
-    public function makeProfilRole(int $profilID):string {
+    public function makeProfilRole(int $profilID)
+    {
         $userProfil = Auth::user()->profil;
         $userLevel = FunctionController::getChampTable(DbTablesHelper::dbTable('DBTBL_PROFILS'),$userProfil,'level');
-        $profils = FunctionController::arraySqlResult("SELECT * FROM 
-                            ".FunctionController::getTableName(DbTablesHelper::dbTable('DBTBL_PROFILS'))." 
-           WHERE level <= {$userLevel} ORDER BY name ASC");
-
-        $sqlr = "SELECT * FROM " .FunctionController::getTableName(DbTablesHelper::dbTable('DBTBL_ROLES')). " ORDER BY name ASC";
-        $roles = FunctionController::arraySqlResult($sqlr);
-
-        $sqlpr = " SELECT * FROM " .FunctionController::getTableName(DbTablesHelper::dbTable('DBTBL_PROFILROLES')). " WHERE profil = $profilID " ;
-        $profilroles = FunctionController::arraySqlResult($sqlpr);
-
+        $profils = Profil::where('level','<=',$userLevel)->orderBy('name')->get()->toArray();
+        $profilroles = ProfilRole::where('profil',$profilID)->get()->toArray();
+        $groupeMenus = GroupeMenu::orderBy('id')->get()->toArray();
+        $menus = Menu::orderBy('rang')->get()->toArray();
+        $men = [];
         $lesRole = [];
         foreach ($profilroles as $r) :
             $lesRole[] = $r['role'];
         endforeach;
-        $j = 0;
-        $tousLesRole = [];
-        $listeCheckbox = "";
-        $nbreTotalRole = count($roles);
-        foreach ($roles as $row) :
-            $j++;
-            $checked = "checked='true'";
-            if (!in_array($row['id'],$lesRole)):
-                $checked =  "";
-                $tousLesRole[] = $row['id'];
-            endif;
-            $route = route('ajax.profilRole');
-
-            $name = $row['name'];
-            $id = $row['id'];
-            $listeCheckbox .= view("template.Tma.checkBoxView", compact('j','checked','name','id','route','profilID'))->render() ;
+        foreach ($menus as $menu):
+            foreach ($groupeMenus as $groupeMenu):
+                if ($groupeMenu['id'] === (int)$menu['groupemenu']):
+                    if (in_array((int)$menu['role'],$lesRole)):
+                        $men[$groupeMenu['id']][] = [
+                            'role' => $menu['role'],
+                            'name' => FunctionController::getChampTable(DbTablesHelper::dbTable('DBTBL_ROLES'),$menu['role']),
+                            'check' => true,
+                        ];
+                    else:
+                        $men[$groupeMenu['id']][] = [
+                            'role' => $menu['role'],
+                            'name' => FunctionController::getChampTable(DbTablesHelper::dbTable('DBTBL_ROLES'),$menu['role']),
+                        ];
+                    endif;
+                endif;
+            endforeach;
         endforeach;
-        $cocheToutChecked = $nbreTotalRole == count($profilroles) ? "checked='true'" : "";
-        $listrole = join('-', $tousLesRole);
-
-        $cocheToutModif = ' sendData(\'profil=' . $profilID . '&key=2&role=' . $listrole . '&bool=\'+ this.checked, \''.\route('ajax.profilRole').'\', \'divInutile\');';
-
-        return view("woody.Tma.gestionDesRoles", compact('cocheToutModif','profils','listeCheckbox','roles','profilID','nbreTotalRole','cocheToutChecked'));
+        $route = route('ajax.profilRole');
+        return view('template.Tma.gestionDesRoles',compact('men','profils','profilID','route'));
     }
 
     public function profilRole(Request $request){
@@ -933,5 +931,31 @@ FOR;
             'message' => $message,
             'alerte' => $alert
         ]);
+    }
+
+    public function checkRoleToProfil(Request $request)
+    {
+        $etat = $request->input('etat');
+        $profilID = $request->input('profilID');
+        $roleID = $request->input('roleID');
+        if ($etat === 'true'):
+             DB::table(DbTablesHelper::dbTablePrefixeOff('DBTBL_PROFILROLES'))
+                ->insert([
+                    'profil' => $profilID ,
+                    'role' =>  $roleID
+                ]);
+            $message = 'Role ajouté avec succès!';
+        else:
+             DB::table(DbTablesHelper::dbTablePrefixeOff('DBTBL_PROFILROLES'))
+                ->where(
+                    [
+                    'profil' => $profilID ,
+                    'role' =>  $roleID
+                    ])->delete();
+            $message = 'Role rétiré avec succès!';
+        endif;
+        return [
+            'message' => $message
+        ];
     }
 }

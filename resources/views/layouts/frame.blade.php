@@ -1,7 +1,13 @@
 <!DOCTYPE html>
 <html lang="fr">
     @include('layouts.administration._head')
-    <body onload="initialize('{{$latparam ?? 5.3096600}}','{{$lngparam ?? -4.0126600}}')">
+    <?php
+    //if (isset($map)):
+    $latDefault =  isset($localite['latitude']) ? $localite['latitude'] : 5.356149786699246;
+    $lngDefault = isset($localite['longitude']) ? $localite['longitude'] :-4.007166835937483;
+    //endif;
+    ?>
+    <body onload="initialize('{{ $latDefault }}','{{ $lngDefault }}')">
     <div class="" style="width: 100%;margin-top: 30px;" >
         <div class="container-fluid">
             <div class="row">

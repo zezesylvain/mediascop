@@ -9,6 +9,7 @@ use App\Http\Controllers\core\FunctionController;
 use App\Http\Controllers\core\ModuleController;
 use App\Imports\DonneesImport;
 use App\Imports\DonneesImportees;
+use App\Models\PubNonValide;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -201,7 +202,9 @@ class SaisieController extends AdminController
                     WHERE c.format = f.id
                     AND c.campagnetitle = ct.id
                     AND f.media = $typemedia $cond)
-            AND ct.operation = o.id AND  o.annonceur = so.id AND so.secteur = se.id";
+            AND ct.operation = o.id AND  o.annonceur = so.id AND so.secteur = se.id
+            ORDER BY ct.id DESC
+            ";
         //dd ($sql);
         $datc = FunctionController::arraySqlResult($sql);
         $mediaID = $typemedia;
@@ -379,11 +382,14 @@ COEF;
     public function storePub(Request $request): JsonResponse
     {
         $data = $request->all();
+        $pubs = false;
+        $css_alert = '';
+        $message = '';
+
         unset($data['_token'],$data['mediaUri'],$data['mediaID']);
         if(isset($data['campagnetitle'], $data['campagne'])):
             $data['dateajout'] = date("Y-m-d");
             $data['user'] = Auth::id();
-            //$data['valide'] = 0;
             unset($data['campagnetitle']);
             if (($request->mediaID === 3) && $data['presse_page'] === "Page interne"):
                 $data['presse_page'] = $data['pageinterne'];
@@ -393,43 +399,46 @@ COEF;
             if((int)$request->mediaID === 6):
                 $data['localite'] = $data['commune'];
                 unset($data['ville'],$data['commune']);
-                $pubs = DB::table (DbTablesHelper::dbTablePrefixeOff ('DBTBL_PUB_NON_VALIDES','db'))->insert ($data);
-                if ($pubs):
-                    $css_alert = " alert-success";
-                    $message = "Données enregistré(s) avec succès!";
+                $listDates = [];
+                $expDateDeb = explode('-',$data['dateDebut']);
+                $expDateFin = explode('-',$data['dateFin']);
+                $dateDeb = mktime(0,0,0,$expDateDeb[1],$expDateDeb[2],$expDateDeb[0]);
+                $dateFin = mktime(0,0,0,$expDateFin[1],$expDateFin[2],$expDateFin[0]);
+                if ($dateFin < $dateDeb):
+                    $css_alert = 'alert-danger';
+                    $message = 'La date de fin doit être supérieur à la date de début.';
                 else:
-                    $css_alert = " alert-danger";
-                    $message = "Veuillez obligatoirement choisir un panneau!";
+                    $uniq_id = self::getUniqId();
+                    $data['affichage_uniq_id'] = $uniq_id;
+                    $data['date_fin_affichage'] = $data['dateFin'];
+                    $data['date'] = $data['dateDebut'];
+                    unset($data['dateFin'],$data['dateDebut']);
+                    $pubs = DB::table (DbTablesHelper::dbTablePrefixeOff ('DBTBL_PUB_NON_VALIDES','db'))->insert ($data);
+                    if ($pubs):
+                        $css_alert = " alert-success";
+                        $message = "Données enregistré(s) avec succès!";
+                    else:
+                        $css_alert = " alert-danger";
+                        $message = "Veuillez obligatoirement choisir un panneau!";
+                    endif;
                 endif;
             elseif((int)$request->mediaID === 7):
-                unset($data['format']);
-                $points = $request->session()->get("pointsHorsMedia");
-                //dd($data,$points);
-                $pubs = DB::transaction (function () use($data,$points){
-                    $pubID = DB::table(DbTablesHelper::dbTablePrefixeOff('DBTBL_PUB_NON_VALIDES','db'))
-                        ->insertGetId($data);
-                    //*
-                    foreach ($points as $r):
-                        DB::table (DbTablesHelper::dbTablePrefixeOff ('DBTBL_COORDONNEES_HORS_MEDIAS','db'))
-                            ->insert (
-                                [
-                                    'pub' => $pubID,
-                                    'latitude' => $r['latitude'],
-                                    'longitude' => $r['longitude'],
-                                    'ville' => $r['ville'],
-                                    'commune' => $r['commune'],
-                                    'detail' => $r['detail_emplacement'],
-                                ]
-                            );
-                    endforeach;//*/
-                    return $pubID;
-                });
-                $css_alert = " alert-success";
-                $message = "Pub enregistrée avec succès!";
-                $request->session ()->forget ("pointsHorsMedia");
+                unset($data['lieuLocalite']);
+                $data['point_id'] = $request->get('lieuLocalite') ?? 0;
+                $data['support'] = 357;
+                $data['localite'] = $request->get("localite");
+                //dd($data);
+                $pubs = DB::table(DbTablesHelper::dbTablePrefixeOff('DBTBL_PUB_NON_VALIDES','db'))->insertGetId($data);
+                if ($pubs):
+                    $css_alert = " alert-success";
+                    $message = "Pub enregistrée avec succès!";
+                else:
+                    $css_alert = " alert-danger";
+                    $message = "Pub non enregistrée";
+                endif;
+                
             else:
-                $pubs = DB::table(DbTablesHelper::dbTablePrefixeOff('DBTBL_PUB_NON_VALIDES','db'))
-                  ->insertGetId($data);
+                $pubs = DB::table(DbTablesHelper::dbTablePrefixeOff('DBTBL_PUB_NON_VALIDES','db'))->insertGetId($data);
                 $css_alert = " alert-success";
                 $message = "Pub enrégistrée avec succès!";
             endif;
@@ -472,11 +481,15 @@ COEF;
         $pubs = FunctionController::arraySqlResult ($query);
         if (count ($pubs)):
             $thDuree = "";
+            $thSupport = "<th width=\"\">Support</th>";
             $action = FunctionController::getChampTable (DbTablesHelper::dbTable ('DBTBL_MEDIAS','db'),$media);
             if ($action === "TELEVISION" || $action === "RADIO"):
                 $thDuree = "<th>Dur&eacute;e</th>";
             endif;
-            return view ("administration.Saisies.tabListePubSaisie", compact ('pubs','thDuree','action'))->render ();
+            if ($action === "AFFICHAGE"):
+                $thSupport = "";
+            endif;
+            return view ("administration.Saisies.tabListePubSaisie", compact ('pubs','thDuree','action','thSupport'))->render ();
         else:
             return "";
         endif;
@@ -1002,7 +1015,7 @@ COEF;
             $pubsSaisies[$medID][] = $r;
         endforeach;
         $mediaActive = $mediaID;
-        return view ("administration.Saisies.listePubSaisie",compact ('medias','pubsSaisies','mediaActive'))->render ();
+        return view ("administration.Saisies.listePubSaisie",compact ('medias','pubsSaisies','mediaActive','mediaID'))->render ();
     }
 
     public function newTypeDeComm(){
@@ -1013,5 +1026,16 @@ COEF;
     public function newTypeDeService(){
         $table = DbTablesHelper::dbTable ('DBTBL_TYPE_DE_SERVICES','db');
         return ModuleController::makeForm ($table);
+    }
+
+    public static function getUniqId()
+    {
+        $uniq = FunctionController::random_1(10);
+        $tst = PubNonValide::where('affichage_uniq_id',$uniq)->get()->count();
+        if ($tst === 0):
+            return $uniq;
+        else:
+            return self::getUniqId();
+        endif;
     }
 }

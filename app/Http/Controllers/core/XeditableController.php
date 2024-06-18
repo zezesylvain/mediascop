@@ -52,6 +52,16 @@ class XeditableController extends Controller
         endif;
     }
 
+    public function updatexEditable(Request $request){
+        if ($request->ajax ()):
+            $ex = explode('&',$request->input('name'));
+            $column = $ex[0];
+            $table = $ex[1];
+            $set = !is_numeric ($request->value) ? addslashes ($request->value) : $request->value;
+            DB::select (DB::raw ("UPDATE $table SET {$column} = '{$set}' WHERE id = {$request->input('pk')}"));
+        endif;
+    }
+
     public function updateDatas(Request $request){
         $table = FunctionController::getTableName ($request->table);
         $pk = $request->pk;

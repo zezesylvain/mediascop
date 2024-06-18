@@ -2,7 +2,7 @@
     <form action="" method="post" id="formFusionID">
         {!! csrf_field () !!}
         <input type="hidden" name="tableID" value="{{$tableID}}">
-        <table id="table" class="table table-bordered" data-toggle="" data-pagination="true" data-search="true" style="vertical-align: middle!important;">
+        <table id="table" class="table table-bordered table-striped" data-toggle="" data-pagination="true" data-search="true" style="vertical-align: middle!important;">
             <thead>
             <tr>
                 @foreach ($dataTableHeader  AS $v => $d)

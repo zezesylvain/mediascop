@@ -1,8 +1,7 @@
 @extends("layouts.frame")
 @section("frameContainer")
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-        <div id="message" class="alert " style="padding-top: 0;">
-        </div>
+        <div id="message" class="alert " style="padding-top: 0;"></div>
     </div>
     <style>
         #formInputSaisie label span{
@@ -20,10 +19,21 @@
             <input type="hidden" name="campagnetitle" value="{{$campagneTitleID}}">
             <div class="row">
                 <div class="container-fluid">
-                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12 form-group-inner">
-                        <label for="date">Date <span>*</span></label>
-                        <input type="text" class="form-control avantDate" name="date" id="date" value="{{date ("Y-m-d")}}"/>
-                    </div>
+                    @if($media === 6)
+                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12 form-group-inner">
+                            <label for="dateDebut">Date debut<span>*</span></label>
+                            <input type="text" class="form-control avantDate" name="dateDebut" id="dateDebut" value="{{date ("Y-m-d")}}"/>
+                        </div>
+                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12 form-group-inner">
+                            <label for="dateFin">Date fin<span>*</span></label>
+                            <input type="text" class="form-control avantDate" name="dateFin" id="dateFin" value="{{date ("Y-m-d")}}" onchange="addInputDate" />
+                        </div>
+                    @else
+                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12 form-group-inner">
+                            <label for="date">Date <span>*</span></label>
+                            <input type="text" class="form-control avantDate" name="date" id="date" value="{{date ("Y-m-d")}}"/>
+                        </div>
+                    @endif
                 </div>
             </div>
             <hr class="trait-bleu">
@@ -78,6 +88,11 @@
                     $('#formInputSaisie #type_service').val('').trigger("chosen:updated");
                     $('#formInputSaisie #ville').val('').trigger("chosen:updated");
                     $('#formInputSaisie #commune').val('').trigger("chosen:updated");
+
+                    $('#formInputSaisie #localite').val('').trigger("chosen:updated");
+                    $('#formInputSaisie #lieuLocalite').val('').trigger("chosen:updated");
+                    $('#formInputSaisie #support').val('').trigger("chosen:updated");
+
                     $('#date').val(data.today);
                     //$('#listeDesPointsHM').html('');
                         setTimeout(function () {
@@ -95,6 +110,32 @@
             });
 
         });
+    </script>
+
+    <script type="text/javascript">
+        function getMobileProfil(supportID) {
+            $.ajax({
+                url: '{{ route('ajax.getMobileProfil') }}',
+                dataType: 'json',
+                data: {
+                    'supportID': supportID
+                },
+                type: 'POST',
+                async: false,
+                success: function (data) {
+                    console.log(data.result)
+                    const profil = $("#mobile")
+                    profil.empty().append('<option value="">Choisir un profile </option>');
+                    $.map(data.result, function(item) {
+                        console.log(item.id,item.name)
+                        profil.append('<option value="'+item.id+'">' + item.name + '</option>');
+                    });
+                    profil.trigger("chosen:updated");
+
+                }
+
+            })
+        }
     </script>
 
     <div id="PrimaryModalhdbgcl" class="modal modal-adminpro-general default-popup-PrimaryModal fade" role="dialog">

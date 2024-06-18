@@ -4,7 +4,7 @@
         <tr>
             <th>Média</th>
             <th>Format</th>
-            <th>Nature</th>
+            {{--<th>Nature</th>--}}
             <th>Cible</th>
             <th>Divers</th>
             <th>Action</th>
@@ -15,7 +15,7 @@
             <tr>
                 <td>{!! $r['media'] !!}</td>
                 <td>{!! $r['format'] !!}</td>
-                <td>{!! $r['nature'] !!}</td>
+                {{--<td>{!! $r['nature'] !!}</td>--}}
                 <td>{!! $r['cible'] !!}</td>
                 <td>{!! $r['divers'] !!}</td>
                 <td>{!! $r['action'] !!}</td>

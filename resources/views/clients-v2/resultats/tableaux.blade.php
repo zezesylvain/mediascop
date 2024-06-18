@@ -1,7 +1,9 @@
 
     @inject("reporting", "\App\Http\Controllers\Client\DataController")
     @inject("highChart", "\App\Http\Controllers\Charts\HighchartController")
-     @foreach($parAnnonceur AS $item => $tab)
+    @php($lesItems = ['media', 'typecom', 'typeservice', 'format', 'cible'])
+    @foreach($lesItems AS $item)
+        @php($tab = $parAnnonceur[$item] ?? [])
         @php($les2ndKeys = $reporting::get2ndKeyInTab($highChart::transformTripleDataForBarChart($tab)))
         @if(!empty($tab))
             @php($rubrique = $parametres[$item]['libelle'])

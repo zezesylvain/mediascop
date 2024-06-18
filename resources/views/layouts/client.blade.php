@@ -17,14 +17,6 @@
                     <p class="pull-right visible-xs">
                         <button type="button" class="btn btn-primary btn-xs" data-toggle="offcanvas">Afficher la barre de s&eacute;lection</button>
                     </p>
-                    <!--
-                    <div class="btn-group btn-group-xs action-btn hidden-xs hidden-print">
-                        <button type="button" class="btn btn-default"><i class="fa fa-print"></i> Imprimer</button>
-                        <button type="button" class="btn btn-default"><i class="fa fa-save"></i> Sauvegarder</button>
-                    </div>
-                    -->
-                <!-- @ yield("selection")-->
-                <!-- Section -->
                     <div class="row">
                         <div class="col-sm-12">
                             <div class="panel panel-default">

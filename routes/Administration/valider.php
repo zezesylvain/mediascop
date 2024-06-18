@@ -14,8 +14,12 @@ Route::group(['namespace' => 'Administration','prefix' => 'valider', 'middleware
     Route::get('internet/liste', 'ValidationDonneesController@listeInternetNonValider')->name('valider.internet');
     Route::get('mobile/liste', 'ValidationDonneesController@listeMobileNonValider')->name('valider.mobile');
     Route::get('hors-media/liste', 'ValidationDonneesController@listeHorsMediaNonValider')->name('valider.hors-media');
-    Route::get('signaler-erreur-pub', 'ValidationDonneesController@signalerErreurPub')->name('ajax.signalerErreurPub');
-    Route::get('signaler-erreur-pub', 'ValidationDonneesController@signalerErreurPub')->name('ajax.signalerErreurPub');
+    Route::post('signaler-erreur-pub', 'ValidationDonneesController@signalerErreurPub')->name('ajax.signalerErreurPub');
+    //Route::get('signaler-erreur-pub', 'ValidationDonneesController@signalerErreurPub')->name('ajax.signalerErreurPub');
     Route::get('valider-operation', 'ValidationDonneesController@validerOperations')->name('ajax.validerOperation');
     Route::post('valider-operation-masse', 'ValidationDonneesController@validerOperationsMasse')->name('store.operation');
+    Route::get('supprimer-pub-erreur/{pid}', 'ValidationDonneesController@supprPubErreur')->name('valider.supprPubErreur');
+
+    Route::post('get-form-update-affichage', 'ValidationDonneesController@getFormUpdateAffichage')->name('ajax.getFormUpdateAffichage');
+    Route::post('update-affichage', 'ValidationDonneesController@updateAffichage')->name('valider.updateAffichage');
 });

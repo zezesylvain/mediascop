@@ -14,4 +14,14 @@
             <i class="fa fa-table"></i> LISTE
         </a>
     </li>
+    <li class="pull-right">
+        <a class="btn btn-danger btn-xs" href="{{ route('event.home') }}" target="_blank">
+            <i class="fa fa-file-pdf-o"></i> EventMap 
+        </a>
+    </li>
+    <li class="pull-right">
+        <a class="btn btn-danger btn-xs" href="{{ route('client.home') }}" target="_blank">
+            <i class="fa fa-map"></i> Reporting 
+        </a>
+    </li>
 </ul>

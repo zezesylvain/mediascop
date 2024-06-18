@@ -8,8 +8,10 @@
     
     <meta name="_token" content="{!! csrf_token() !!}"/>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    
-    
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet"> 
+
     <!-- favicon
 		============================================ -->
     <link rel="shortcut icon" type="image/x-icon" href="{{asset ("medias/icone.ico")}}">
@@ -41,7 +43,7 @@
     <link rel="stylesheet" href="{{asset("template/css/main.css")}}">
     <!-- morrisjs CSS
 		============================================ -->
-    <link rel="stylesheet" href="{{asset("template/css/morrisjs/morris.css")}}">
+    {{--<link rel="stylesheet" href="{{asset("template/css/morrisjs/morris.css")}}">--}}
     <!-- mCustomScrollbar CSS
 		============================================ -->
     <link rel="stylesheet" href="{{asset("template/css/scrollbar/jquery.mCustomScrollbar.min.css")}}">
@@ -64,7 +66,7 @@
     <!-- x-editor CSS
 		============================================ -->
     <link rel="stylesheet" href="{{asset("template/css/editor/select2.css")}}">
-    <link rel="stylesheet" href="{{asset("template/css/editor/datetimepicker.css")}}">
+    {{--<link rel="stylesheet" href="{{asset("template/css/editor/datetimepicker.css")}}">--}}
     <link rel="stylesheet" href="{{asset("template/css/editor/bootstrap-editable.css")}}">
     <link rel="stylesheet" href="{{asset("template/css/editor/x-editor-style.css")}}">
     <!-- modals CSS
@@ -97,8 +99,9 @@
     
     <!-- datapicker CSS
 	============================================ -->
-    <link rel="stylesheet" href="{{asset ("template/css/datapicker/datepicker3.css")}}">
-    
+    {{--<link rel="stylesheet" href="{{asset ("template/css/datapicker/datepicker3.css")}}">--}}
+    <link rel="stylesheet" href="{{asset ("css/flatpickr.min.css")}}">
+
     <!-- duallistbox CSS
 		============================================ -->
     <link rel="stylesheet" href="{{asset ("template/css/duallistbox/bootstrap-duallistbox.min.css")}}">
@@ -137,16 +140,13 @@
 	============================================ -->
     <script src="{{asset("softs/senddata/senddata.js")}}"></script>
     
-    {{--@if(isset($map))
-		@php(dump ($map))--}}
+    {{--@if(isset($map))--}}
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD6cjLW8vcDWHitlFzWnWKb0QoFaLcu8xI&callback=initialize"></script>
-    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.1.min.js"></script>
-    <script src="{{asset("softs/map/cluster.js")}}"></script>
+    <script src="{{ asset('js/aspnetcdn.jquery1.10.1.min.js') }}"></script>
+    <script src="{{asset("softs/map/cluster.js")}}" ></script>
     <script src="{{asset("softs/map/geomap.js")}}"></script>
-    {{--
-	@endif
-	--}}
-    
+	{{--@endif--}}
+
     <script type="text/javascript">
         $(document).ready(function () {
             $.ajaxSetup({
@@ -158,4 +158,26 @@
         });
     </script>
     <link rel="stylesheet" href="{{asset("css/vz.css")}}?d={{date('Ymdhis')}}">
+    
+    <style>
+        @media (max-width: 767px) {
+            .all-content-wrapper {
+            margin-left: 0px;
+        }
+           .header-top-area{
+               position: relative;
+               left: 0px;
+           }
+            .logo-pro {
+                display: block;
+                text-align: center;
+                background: #fff;
+                font-family: 'Montserrat', sans-serif;
+            }
+        }
+        .sidebar-nav .metismenu ul a {
+        padding: 1px 15px 1px 30px;
+            padding-right: 15px;
+    }
+    </style>
 </head>

@@ -6,6 +6,12 @@ use App\Helpers\DbTablesHelper;
 use App\Http\Controllers\core\FunctionController;
 use App\Http\Controllers\core\ModuleController;
 use App\Http\Controllers\core\XeditableController;
+use App\Models\Annonceur;
+use App\Models\Campagnetitle;
+use App\Models\Media;
+use App\Models\Secteur;
+use App\Models\TypePromo;
+use App\Models\TypeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
@@ -19,13 +25,12 @@ class CampagnesController extends AdminController
 
     public function newOperations(){
         $table = DbTablesHelper::dbTable ('DBTBL_OPERATIONS','dbtables');
-        $annonceurs = FunctionController::arraySqlResult ("SELECT * FROM ".DbTablesHelper::dbTable ('DBTBL_ANNONCEURS','db')." ORDER BY raisonsociale ASC");
+        $annonceurs = Annonceur::orderBy('raisonsociale','ASC')->get()->toArray();
         $couvertures = FunctionController::arraySqlResult ("SELECT * FROM ".DbTablesHelper::dbTable ('DBTBL_COUVERTURES','db')." ORDER BY name ASC");
-        $typecoms = FunctionController::arraySqlResult ("SELECT * FROM ".DbTablesHelper::dbTable ('DBTBL_TYPECOMS','db')." ORDER BY name ASC");
-        $typeservices = FunctionController::arraySqlResult ("SELECT * FROM ".DbTablesHelper::dbTable ('DBTBL_TYPESERVICES','db')." ORDER BY name ASC");
+        $typeservices = TypeService::orderBy('name','asc')->get()->toArray();
         $donnees = ModuleController::makeTable ($table," ORDER BY  adddate DESC LIMIT 0, 500 ");
         $dateajout = date ("Y-m-d");
-        return view ("administration.Operations.formOperation",compact ('typeservices', 'typecoms','donnees','annonceurs','couvertures','dateajout'));
+        return view ("administration.Operations.formOperation",compact ('typeservices','donnees','annonceurs','couvertures','dateajout'));
     }
 
     public function newCampagnes(){
@@ -189,29 +194,36 @@ class CampagnesController extends AdminController
 
     public function formCampagne(Request $request){
         if (array_key_exists ('v',$request->all ())):
-            $name = $request->name;
+            $name = $request->input('name');
             $nbrk = strlen($name);
             if($nbrk >= 3):
-                $cond = " WHERE title = '$name'";
+                $opID = $request->input('opid');
+                $cond = " WHERE title = '$name' AND operation = $opID ";
                 $nb = FunctionController::nbrows(DbTablesHelper::dbTable('DBTBL_CAMPAGNETITLES','db'), $cond);
-                if ($request->v == 1):
+                if ($request->input('v') == 1):
                     return view ("administration.Campagnes.isOk", compact ('nb'))->render ();
                 endif;
-                if ($request->v == 2):
+                if ($request->input('v') == 2):
                     return view ("administration.Campagnes.btn", compact ('nb'))->render ();
                 endif;
             endif ;
         else:
-            $operationID = $request->opid;
-            $annonceurID = $request->annonceurID;
-            $secteurID =$request->secteurID;
+            $operationID = $request->input('opid');
+            $annonceurID = $request->input('annonceurID');
+            $secteurID =$request->input('secteurID');
             $offretelecom = [];
+            $typePromos = TypePromo::orderBy('name','asc')->get()->toArray();
             if($secteurID === 1):
                 $offretelecom = FunctionController::arraySqlResult(" SELECT * FROM 
                 ".DbTablesHelper::dbTable('DBTBL_OFFRE_TELECOMS','db')." 
                 ORDER BY name ASC");
             endif;
-            return view('administration.Campagnes.offreTelecomSelect', compact('offretelecom','operationID','annonceurID','secteurID'))->render ();
+            $form = view('administration.Campagnes.offreTelecomSelect', compact('offretelecom','operationID','annonceurID','secteurID','typePromos'))->render ();
+            //sleep(10);
+            return [
+                'formCampTitle' => $form,
+                'typePromos' => $typePromos
+            ];
         endif;
     }
 
@@ -220,7 +232,7 @@ class CampagnesController extends AdminController
         $title = $request->get('title');
         //$offretelecom = $request->get('offretelecom');
         $operation = $request->get('operation');
-        $addate = date('Y-m-d');
+        $addate = date('Y-m-d H:i:s');
 
         $idcamptitle = DB::table(DbTablesHelper::dbTablePrefixeOff('DBTBL_CAMPAGNETITLE_NON_VALIDES','db'))
             ->insertGetId(
@@ -230,6 +242,7 @@ class CampagnesController extends AdminController
                    // "offretelecom"  => $offretelecom,
                     "adddate"       => $addate,
                     "user"          => Auth::id(),
+                    'type_promo' => $request->input('type_promo')
                 ]
             );
 
@@ -268,20 +281,19 @@ class CampagnesController extends AdminController
         return view('administration.Campagnes.form2', compact('idcamptitle','listeDesAnnonceurs','listeDesMedias','defaultvalue','listeDesSponsors','docampagnes','uploadDir'));
     }
 
-    public static function makeTableTitle(int $campagnetitle):string {
-        $campagneInfos = FunctionController::arraySqlResult("
-            SELECT ct.title, o.name as operation,o.id AS opid,a.raisonsociale,s.name as secteur,of.name as offretelecom,of.id AS offretelecomid 
-            FROM 
-                ".DbTablesHelper::dbTable('DBTBL_CAMPAGNETITLES','dbtable')." ct, 
-                ".DbTablesHelper::dbTable('DBTBL_OPERATIONS','dbtable')." o, 
-                ".DbTablesHelper::dbTable('DBTBL_ANNONCEURS','dbtable')." a,
-                ".DbTablesHelper::dbTable('DBTBL_SECTEURS','dbtable')." s,
-                ".DbTablesHelper::dbTable('DBTBL_OFFRE_TELECOMS','dbtable')." of 
-             WHERE ct.operation = o.id AND ct.offretelecom = of.id AND o.annonceur = a.id AND a.secteur = s.id AND ct.id = $campagnetitle
-        ");
-        if(count($campagneInfos)):
+    public static function makeTableTitle(int $campagnetitle):string
+    {
+        $campagneInfos = DB::table(DbTablesHelper::dbTablePrefixeOff('DBTBL_CAMPAGNETITLES','db').' as ct')
+            ->selectRaw("zdsb_ct.title, zdsb_o.name as operation,zdsb_o.id AS opid,zdsb_a.raisonsociale,zdsb_s.name as secteur,zdsb_ct.type_promo")
+            ->join(DbTablesHelper::dbTablePrefixeOff('DBTBL_OPERATIONS','db').' as o','o.id','=','ct.operation')
+            ->join(DbTablesHelper::dbTablePrefixeOff('DBTBL_ANNONCEURS','db').' as a','a.id','=','o.annonceur')
+            ->join(DbTablesHelper::dbTablePrefixeOff('DBTBL_SECTEURS','db').' as s','s.id','=','a.secteur')
+            ->where('ct.id','=',$campagnetitle)
+            ->get()->toArray();
+        if(!empty($campagneInfos)):
             return view ("administration.Campagnes.tableauCampagneInfos", compact ('campagneInfos','campagnetitle'))->render ();
         endif;
+        return '';
     }
 
     public static function makeListeCampagnes(int $campagnetitle) {
@@ -312,7 +324,7 @@ class CampagnesController extends AdminController
 
                 $format = FunctionController::getChampTable(DbTablesHelper::dbTable('DBTBL_FORMATS','db'),$r['format']);
 
-                $nature =  FunctionController::getChampTable(DbTablesHelper::dbTable('DBTBL_NATURES','db'),$r['nature']);
+                //$nature =  FunctionController::getChampTable(DbTablesHelper::dbTable('DBTBL_NATURES','db'),$r['nature']);
 
                 $cible =  FunctionController::getChampTable(DbTablesHelper::dbTable('DBTBL_CIBLES','db'),$r['cible']);
 
@@ -321,7 +333,7 @@ class CampagnesController extends AdminController
                 $formatexte = XeditableController::xEditableJS($databaseTable,"format",$r['id'],$typeFormat['type'],$format);
 
                 $typeNature = XeditableController::getColumnType ($databaseTable,"nature");
-                $naturetexte = XeditableController::xEditableJS($databaseTable,"nature",$r['id'],$typeNature['type'],$nature);
+                //$naturetexte = XeditableController::xEditableJS($databaseTable,"nature",$r['id'],$typeNature['type'],$nature);
 
                 $typeCible = XeditableController::getColumnType ($databaseTable,"cible");
                 $cibletexte =XeditableController::xEditableJS($databaseTable,"cible",$r['id'],$typeCible['type'],$cible);
@@ -329,7 +341,7 @@ class CampagnesController extends AdminController
                 $datas[] = [
                     'media' => $media[0]['name'],
                     'format' => $formatexte,
-                    'nature' => $naturetexte,
+                    //'nature' => $naturetexte,
                     'cible' => $cibletexte,
                     'divers' => $mm,
                     'action' => $suppr,
@@ -405,8 +417,7 @@ class CampagnesController extends AdminController
     }
 
     public static function createChampsInputCampagne(int $idcamptitle):string {
-        $listeDesMedias = FunctionController::arraySqlResult ("SELECT * FROM
-            ".DbTablesHelper::dbTable ('DBTBL_MEDIAS','db')." ORDER BY name ASC");
+        $listeDesMedias = Media::orderBy('name','asc')->get()->toArray();
         return view ("administration.Campagnes.inputFormCampagne",compact ('idcamptitle','listeDesMedias'))->render ();
     }
 
@@ -569,16 +580,13 @@ class CampagnesController extends AdminController
         $addate = date('Y-m-d H:i:s');
         $begindate = date('Y-m-d').' '.date('H:i:s');
         $parrain = "";
-        $campagnetitle = $request->campagnetitleID;
+        $campagnetitle = $request->input('campagnetitleID');
         $newCampagne = DB::table(DbTablesHelper::dbTablePrefixeOff('DBTBL_CAMPAGNES','db'))
             ->insert(
                 [
                     'campagnetitle' => $campagnetitle,
                     'format' => $request->get('format'),
-                    'nature' => $request->get('nature'),
                     'cible' => $request->get('cible'),
-                    'type_promo' => $request->get('type_promo'),
-                    'type_service' => $request->get('type_service'),
                     'duree' => $request->get('duree'),
                     'presse_calibre' => $request->get('presse_calibre'),
                     'presse_couleur' => $request->get('presse_couleur'),
@@ -680,8 +688,8 @@ class CampagnesController extends AdminController
 
     public function putMediaInBd(Request $request){
         $data = $request->all() ;
-        $data['adddate'] = date('Y-m-d H:i:s') ;
-        $insert = DB::table(DbTablesHelper::dbTablePrefixeOff('DBTBL_DOCAMPAGNES','db'))
+        $data['adddate'] = ''.date('Y-m-d H:i:s').'' ;
+        DB::table(DbTablesHelper::dbTablePrefixeOff('DBTBL_DOCAMPAGNES','db'))
             ->insert($data);
         $campagnetitleid = $data['campagnetitle'] ;
 
@@ -756,6 +764,8 @@ class CampagnesController extends AdminController
             $userID = Auth::id ();
             $datas['user'] = $userID;
             $datas['adddate'] = $datas['adddate']." ".date ("H:i:s");
+            $datas['typeservice'] = $datas['type_service'];
+            unset($datas['type_service']);
             $new = DB::table (DbTablesHelper::dbTablePrefixeOff ('DBTBL_OPERATIONS','db'))
                 ->insertGetId ($datas);
             if ($new):
@@ -805,7 +815,7 @@ class CampagnesController extends AdminController
             });
             Session::flash("success", "Titre de campagne validée(s) avec succès!");
         else:
-            Session::flash("info","Veuillez choisir au moins un titre de campagna!");
+            Session::flash("info","Veuillez choisir au moins un titre de campagne!");
         endif;
         return back ();
 
@@ -828,6 +838,50 @@ class CampagnesController extends AdminController
         endforeach;
         echo "<h1>", count($data), " operations mises a jour</h1>";
         exit();
-        
+    }
+
+    public function getTypeService(Request $request)
+    {
+        $annID = $request->input('annonceurID');
+        $typeServices = [];
+        if ($annID !== null):
+            $annonceur = Annonceur::find($annID);
+            $secteur = Secteur::find($annonceur->secteur);
+            $typeServices = TypeService::where('secteur',$secteur->id)->get()->toArray();
+        endif;
+
+        return ['typeServices' => $typeServices];
+
+    }
+
+    public function validerTitreCampagne(Request $request)
+    {
+        $title = $request->input('title');
+        $opID = $request->input('opid');
+        $validerOffre = false;
+        if ($title !== null):
+            $campTitle = Campagnetitle::where('title',$title)->where('operation',$opID)
+                ->get()->toArray();
+            if (empty($campTitle)):
+                $validerOffre = true;
+            endif;
+        endif;
+        return [
+            'validerOffre' => $validerOffre
+        ];
+    }
+
+    public function getMobileProfil(Request $request)
+    {
+        $supportID = $request->input('supportID');
+        $result = [];
+        if ($supportID !== null):
+            $result = DB::table(DbTablesHelper::dbTablePrefixeOff('DBTBL_PROFIL_MOBILES','db'))
+                ->where('support',$supportID)
+                ->get()->toArray();
+        endif;
+        return [
+            'result' => $result
+        ];
     }
 }

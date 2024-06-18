@@ -1,5 +1,5 @@
 <fieldset>
-    <legend><h4>Communication</h4></legend>
+    <legend><h4>ANNONCEUR, LOCALISATION </h4></legend>
     <div class="row">
         <div class="col-sm-12">
             <div class="row">

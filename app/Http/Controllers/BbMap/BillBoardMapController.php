@@ -59,6 +59,7 @@ class BillBoardMapController extends AdminController
             $selection = Session::get('BillbordMapSelection.selection');
             $listeDesMap = Session::get('BillbordMapSelection.listeDesMap');
         endif;
+        dd(compact ('secteurs','nbrsecteur','villes','listeDesMap','selection'));
         //return view ("bbmap.index", compact ('secteurs','nbrsecteur','regions','villes','listeDesMap','selection'));
         return view ("bbmap.tplclient", compact ('secteurs','nbrsecteur','villes','listeDesMap','selection'));
     }

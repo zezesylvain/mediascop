@@ -14,11 +14,11 @@
         <option value="">Choisir une commune</option>
     </select>
 </div>
-<div class="col-md-2 form-group">
+<div class="col-sm-2 form-group">
     <label for="nombre"> Nombre <span>*</span></label>
     <input  class="form-control" type="number" min="0" id="nombre" name="nombre" pattern="\d*" title="Mettez un nombre" required />
 </div>
-<div class="col-md-3 form-group">
+<div class="col-sm-3 form-group">
     <label for="investissement"> Investissement <span>*</span></label>
     <input  class="form-control" type="number" min="0" id="investissement" name="investissement" pattern="\d*" title="Mettez un nombre" required />
 </div>

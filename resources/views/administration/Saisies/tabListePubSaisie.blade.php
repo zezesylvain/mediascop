@@ -14,7 +14,7 @@
                                     <th width=""></th>
                                     <th width="">Date</th>
                                     {!! $thDuree !!}
-                                    <th width="">Support</th>
+                                    {!! $thSupport !!}
                                     <th>Titre de campagne</th>
                                     <th width="">Tarif</th>
                                     <th width="">Coeff</th>
@@ -27,10 +27,12 @@
                                     <tr>
                                         <td>{{$i}}</td>
                                         <td>{{$date2Fr ($r['date'])}}</td>
-                                        @if($action == "TELEVISION" || $action == "RADIO")
+                                        @if($action === "TELEVISION" || $action === "RADIO")
                                             <td>{{$r['heure']}}</td>
                                         @endif
-                                        <td>{{$getChampTable ($dbTable ('DBTBL_SUPPORTS','db'),$r['support'])}}</td>
+                                        @if($action !== "AFFICHAGE")
+                                            <td>{{$getChampTable ($dbTable ('DBTBL_SUPPORTS','db'),$r['support'])}}</td>
+                                        @endif
                                         @php($campagneTitle = $getChampTable ($dbTable ('DBTBL_CAMPAGNES','db'),$r['campagne'],'campagnetitle'))
                                         <td>{!! $getChampTable ($dbTable ('DBTBL_CAMPAGNETITLES','db'),$campagneTitle,'title') !!}</td>
                                         <td>{{$r['tarif']}}</td>

@@ -74,5 +74,5 @@
 
 <hr class="trait-bleu">
 <div id="frameitem">
-    <iframe src="{{route ('saisie.frameFormSaisie',[$datc[0]['id'],$media])}}" width="100%" height="700px"></iframe>
+    <iframe src="{{route ('saisie.frameFormSaisie',[$datc[0]['id'],$media])}}" width="100%" style="min-height: 450px;"></iframe>
 </div>

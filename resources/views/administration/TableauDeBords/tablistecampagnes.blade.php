@@ -31,7 +31,7 @@
                                             @foreach ($tabdata as $rowvalue)
                                             <tr>
                                                 <td>
-                                                    {{$rowvalue['adddate']}}
+                                                    {{ $date2Fr($rowvalue['adddate'],'d/m/Y H:i:s') }}
                                                 </td>
                                                 <td>
                                                     {!! $rowvalue['raisonsociale'] !!}
@@ -50,7 +50,10 @@
                                                         @php($ij++)
                                                             <div id="validebox{{$rowvalue['id']}}">
                                                                 <input id="listcamp[{{$ij}}]" type="checkbox" name="listcamp[]" value="{{$rowvalue['id']}}"><br>
+                                                                <a href="#plisting" title="Valider le titre de campagne" onclick="validerSaisie('{{$DATABASE}}','{{$rowvalue['id']}}','campagne', '{{$routeval}}','{{'validebox'.$rowvalue['id']}}')" style="color: #0000cc;">
+{{--
                                                                 <a href="#plisting" title="Valider le titre de campagne" onclick="sendData('database={{$DATABASE}}&id={{$rowvalue['id']}}&k=campagne', '{{$routeval}}', 'validebox{{$rowvalue['id']}}');" style="color: #0000cc;">
+--}}
                                                                     <i class="fa fa-check-circle"></i>
                                                                 </a>
                                                             </div>

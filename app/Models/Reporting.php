@@ -37,4 +37,10 @@ class Reporting extends Model
     public function typeservice(){
         return $this->belongsTo('App\Models\Typeservice');
     }
+    public function localite(){
+        return $this->belongsTo('App\Models\Localite', 'localite');
+    }
+    public function point(){
+        return $this->belongsTo('App\Models\Point');
+    }
 }
